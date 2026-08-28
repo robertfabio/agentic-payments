@@ -13,7 +13,7 @@ button, input{
     font: inherit;
 }
 
-.login.page{
+.login-page{
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -44,6 +44,75 @@ button, input{
 
 .login-form button{
     padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.chat-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+}
+
+.chat-header p{
+    margin: 4px 0 0;
+}
+
+.chat-messages{
+    flex: 1;
+    padding: 24px;
+    overflow: auto;
+}
+
+.message{
+    max-width: 70%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+}
+
+.user{
+    margin-left: auto;
+    background-color: #ddd;
+}
+
+.assistant{
+    margin-right: auto;
+    background-color: white;
+}
+
+
+.chat-input{
+     padding: 16px 24px;
+     background-color: white;
+     border-top: 1px solid #ddd;
+}
+
+.chat-input form{
+    display: flex;
+    gap: 8px;
+}
+
+
+.chat-input input{
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.chat-input button{
+    padding: 12px 20px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
