@@ -2,7 +2,7 @@ import { Router } from "express";
 import type { ApiError, ChatRequest, ChatResponse } from "@agentic/shared";
 import { requireAuth } from "../auth/index.js";
 import { responder } from "../agent/loop.js";
-import { criarConversa, getConversa } from "./store.js";
+import { apagarConversa, criarConversa, getConversa } from "./store.js";
 
 export const chatRouter: Router = Router();
 
@@ -40,3 +40,13 @@ chatRouter.post("/chat", requireAuth, async (req, res) => {
   }
 });
 
+chatRouter.delete("/chat/:id", requireAuth, (req, res) => {
+  if (!apagarConversa(req.params.id!, req.usuario!.id)) {
+    const erro: ApiError = {
+      erro: "CONVERSA_NAO_ENCONTRADA",
+      mensagem: "Conversa inexistente ou de outro usuario.",
+    };
+    return res.status(404).json(erro);
+  }
+  return res.status(204).end();
+});
