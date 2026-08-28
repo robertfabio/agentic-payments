@@ -17,18 +17,35 @@ export function Login({ onEntrar }: { onEntrar: (s: LoginResponse) => void }) {
     }
   }
 
-  return (
-    <form onSubmit={enviar}>
+ return (
+  <main className="login-page">
+    <form className="login-form" onSubmit={enviar}>
       <h1>Agentic Payments</h1>
-      <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="usuario" />
-      <input
+      <p>Entre para acessar o chat de pagamentos</p>
+
+      <label>
+        Usuário
+        <input value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Digite sua senha"
+        />
+      </label>
+
+      <label>
+        Senha
+        <input 
         type="password"
         value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        placeholder="senha"
-      />
+        onChange={(e) => setSenha(e.target.value)} 
+        placeholder="Digite sua senha"
+        />
+      </label>
+
       <button type="submit">Entrar</button>
-      {erro && <p>{erro}</p>}
+
+      {erro && <p className="error-message">{erro}</p>}
+      
     </form>
-  );
+  </main>
+);
 }
