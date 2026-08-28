@@ -76,10 +76,12 @@ export type ChatMessage =
   | { role: "tool"; tool_call_id: string; name: string; content: string };
 
 export interface ChatRequest {
-  messages: ChatMessage[];
+  message: string;
+  conversa_id?: string;
 }
 
 export interface ChatResponse {
+  conversa_id: string;
   messages: ChatMessage[];
 }
 

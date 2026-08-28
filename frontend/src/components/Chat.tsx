@@ -9,16 +9,19 @@ interface Props {
 
 export function Chat({ sessao, onSair }: Props) {
   const [mensagens, setMensagens] = useState<ChatMessage[]>([]);
+  const [conversaId, setConversaId] = useState<string | undefined>();
   const [texto, setTexto] = useState("");
 
   async function enviar(e: FormEvent) {
     e.preventDefault();
     if (!texto.trim()) return;
 
-    const historico: ChatMessage[] = [...mensagens, { role: "user", content: texto }];
-    setMensagens(historico);
+    setMensagens([...mensagens, { role: "user", content: texto }]);
     setTexto("");
-    setMensagens(await enviarChat(historico, sessao.token));
+
+    const resposta = await enviarChat(texto, sessao.token, conversaId);
+    setConversaId(resposta.conversa_id);
+    setMensagens(resposta.messages);
   }
 
   return (

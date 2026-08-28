@@ -1,6 +1,5 @@
 import type {
   ApiError,
-  ChatMessage,
   ChatRequest,
   ChatResponse,
   LoginRequest,
@@ -24,13 +23,16 @@ export async function login(credenciais: LoginRequest): Promise<LoginResponse> {
   return parseOuFalhar<LoginResponse>(res);
 }
 
-export async function enviarChat(messages: ChatMessage[], token: string): Promise<ChatMessage[]> {
-  const corpo: ChatRequest = { messages };
+export async function enviarChat(
+  message: string,
+  token: string,
+  conversaId?: string,
+): Promise<ChatResponse> {
+  const corpo: ChatRequest = { message, conversa_id: conversaId };
   const res = await fetch(`${BASE_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(corpo),
   });
-  const { messages: atualizado } = await parseOuFalhar<ChatResponse>(res);
-  return atualizado;
+  return parseOuFalhar<ChatResponse>(res);
 }
