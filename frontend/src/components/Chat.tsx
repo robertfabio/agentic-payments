@@ -8,7 +8,13 @@ interface Props {
 }
 
 export function Chat({ sessao, onSair }: Props) {
-  const [mensagens, setMensagens] = useState<ChatMessage[]>([]);
+  const [mensagens, setMensagens] = useState<ChatMessage[]>([
+    {
+      role: "assistant",
+      content: "Olá! como posso ajudar você?"
+    },
+  ]);
+
   const [texto, setTexto] = useState("");
   const [carregando, setCarregando] = useState(false);
   const[erro, setErro] = useState<string | null>(null);
@@ -57,6 +63,8 @@ async function enviar(e: FormEvent){
 
        
       <main className="chat-messages">
+      {mensagens.length === 0 && (<p>Nenhuma mensagem ainda</p>
+    )}  
       {mensagens.map((m, i) => (
         <div
         key={i}
