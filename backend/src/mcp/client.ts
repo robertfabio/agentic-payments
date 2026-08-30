@@ -73,3 +73,10 @@ export async function chamarTool(
     .map((b) => b.text ?? "")
     .join("\n");
 }
+
+export async function fecharMcpClient(): Promise<void> {
+  const pendente = clientePromise;
+  if (!pendente) return;
+  clientePromise = undefined;
+  await (await pendente).close();
+}
