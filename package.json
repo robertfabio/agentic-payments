@@ -14,9 +14,10 @@
     "dev:backend": "npm run dev -w backend",
     "dev:frontend": "npm run dev -w frontend",
     "dev:mcp": "npm run dev -w mcp-server",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present && tsc -p tests --noEmit",
     "lint": "eslint .",
-    "format": "prettier --write \"**/*.{ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "test": "node --import tsx --test tests/*.test.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
