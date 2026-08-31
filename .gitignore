@@ -9,3 +9,6 @@ build/
 .vscode/
 .idea/
 .data/
+e2e/.resultados/
+playwright-report/
+test-results/

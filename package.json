@@ -19,7 +19,9 @@
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "test": "node --import tsx --test tests/*.test.ts",
     "e2e": "tsx scripts/e2e.ts",
-    "jailbreak": "tsx scripts/jailbreak.ts"
+    "jailbreak": "tsx scripts/jailbreak.ts",
+    "e2e:ui": "playwright test --config playwright.config.ts",
+    "e2e:prints": "playwright test --config playwright.prints.config.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
