@@ -23,16 +23,11 @@ declare global {
   namespace Express {
     interface Request {
       usuario?: User;
-      /** jti e exp do access token atual, para o logout conseguir revoga-lo. */
       tokenAtual?: { jti: string; exp?: number };
     }
   }
 }
 
-/**
- * Os segredos de exemplo que acompanham o repositorio. Assinar com um deles
- * significa que qualquer um que leu o README consegue forjar um token.
- */
 const SEGREDOS_DE_EXEMPLO = new Set(["dev-secret", "troque-este-segredo-em-desenvolvimento"]);
 
 if (SEGREDOS_DE_EXEMPLO.has(config.jwtSecret)) {
@@ -81,8 +76,6 @@ authRouter.post("/login", async (req, res) => {
   }
 
   const seed = SEED_USERS.find((u) => u.username === username);
-  // Conferimos o hash mesmo sem usuario, com um hash descartavel, para que o
-  // tempo de resposta nao entregue quais usernames existem.
   const hash = seed?.senha_hash ?? SEED_USERS[0]!.senha_hash;
   const senhaConfere = await conferirSenha(senha, hash);
 

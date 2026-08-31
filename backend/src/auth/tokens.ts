@@ -5,9 +5,7 @@ import { config } from "../config.js";
 export const ALGORITMO = "HS256";
 export const EMISSOR = "agentic-payments";
 
-/** Access curto: se vazar, a janela de uso e pequena. */
 const VALIDADE_ACCESS_S = 15 * 60;
-/** Refresh longo, mas guardado no servidor e revogavel. */
 const VALIDADE_REFRESH_S = 7 * 24 * 60 * 60;
 
 export type TipoToken = "access" | "refresh";
@@ -18,10 +16,8 @@ interface Payload extends jwt.JwtPayload {
   jti: string;
 }
 
-/** Refresh tokens vivos: jti -> dono e expiracao. Sair da conta remove daqui. */
 const refreshAtivos = new Map<string, { usuarioId: string; expiraEm: number }>();
 
-// Access e stateless: sem esta lista, o logout deixaria o token valendo ate expirar.
 const accessRevogados = new Map<string, number>();
 
 function limpar() {
@@ -64,7 +60,6 @@ function verificar(token: string, typ: TipoToken): Payload | undefined {
     if (typeof payload === "string") return undefined;
 
     const { sub, typ: tipo, jti } = payload as Payload;
-    // Um refresh token nao pode ser usado como access, nem o contrario.
     if (!sub || !jti || tipo !== typ) return undefined;
     return payload as Payload;
   } catch {
@@ -79,7 +74,6 @@ export function verificarAccess(token: string): Payload | undefined {
   return payload;
 }
 
-// Rotaciona: o refresh usado e descartado, reapresentar o antigo nao funciona.
 export function rotacionar(refreshToken: string): ParDeTokens | undefined {
   limpar();
   const payload = verificar(refreshToken, "refresh");
@@ -92,7 +86,6 @@ export function rotacionar(refreshToken: string): ParDeTokens | undefined {
   return emitirPar(payload.sub);
 }
 
-/** Encerra a sessao: o refresh some e o access atual para de valer. */
 export function encerrarSessao(refreshToken: string | undefined, accessPayload?: Payload) {
   limpar();
 

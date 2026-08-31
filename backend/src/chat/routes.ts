@@ -31,8 +31,6 @@ chatRouter.post("/chat", requireAuth, async (req, res) => {
   try {
     const messages = await responder(comPergunta, usuario);
 
-    // So gravamos depois que o agente respondeu. Se ele falhar, o historico
-    // guardado nao muda e uma conversa nova nem chega a ser criada.
     const alvo = conversa ?? criarConversa(usuario.id);
     alvo.messages = messages;
 
