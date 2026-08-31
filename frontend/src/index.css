@@ -150,6 +150,10 @@ button, input{
     border-top-left-radius: 4px;
 }
 
+.mensagem-carregando{
+    color: #64748b;
+    font-style: italic;
+}
 
 .chat-input{
      padding: 16px 24px;

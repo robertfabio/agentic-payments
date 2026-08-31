@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent, useRef } from "react";
 import type { ChatMessage, LoginResponse } from "@agentic/shared";
 import { enviarChat } from "../api.js";
 
@@ -18,6 +18,15 @@ export function Chat({ sessao, onSair }: Props) {
   const [texto, setTexto] = useState("");
   const [carregando, setCarregando] = useState(false);
   const[erro, setErro] = useState<string | null>(null);
+  const fimDasMensagens = useRef<HTMLDivElement | null>(null);
+
+
+useEffect(() => {
+  fimDasMensagens.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [mensagens,carregando]);
+
 
 async function enviar(e: FormEvent){
   e.preventDefault();
@@ -74,10 +83,15 @@ async function enviar(e: FormEvent){
         </div>
       ))}
 
-      {carregando && <p>Enviando...</p>}
+      {carregando && (
+        <div className="message assistant mensagem-carregando ">
+          Digitando...
+        </div>
+      )}
 
       {erro && <p className="error-message">{erro}</p>}
 
+      <div ref={fimDasMensagens}></div>
       </main>
 
       <footer className="chat-input">
