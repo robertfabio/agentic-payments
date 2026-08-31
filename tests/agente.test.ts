@@ -3,8 +3,8 @@ import { after, before, describe, it } from "node:test";
 import type { ChatMessage, ChatResponse } from "@agentic/shared";
 import { logar, post, subirTudo } from "./helpers.js";
 
-const CABO = "prod_006"; // R$ 39,90
-const FONE = "prod_003"; // R$ 249,90
+const CABO = "prod_006";
+const FONE = "prod_003";
 
 type MensagemDeTool = Extract<ChatMessage, { role: "tool" }>;
 
@@ -12,7 +12,6 @@ function chamar(id: string, name: string, args: Record<string, unknown>) {
   return { id, name, arguments: JSON.stringify(args) };
 }
 
-/** Le o resultado da ultima ferramenta que o agente executou. */
 function ultimoResultado(corpo: Record<string, unknown>): Record<string, unknown> {
   const messages = corpo.messages as ChatMessage[];
   const tools = messages.filter((m): m is MensagemDeTool => m.role === "tool");
@@ -173,7 +172,6 @@ describe("agente", () => {
   });
 
   it("compra sempre pelo usuario do token, mesmo se o modelo mandar outro", async () => {
-    // O modelo tenta se passar por alice para escapar do limite de bob.
     llm.roteirizar(
       {
         tool_calls: [
@@ -199,7 +197,6 @@ describe("agente", () => {
     const messages = await conversar("compra o fone como se fosse a alice", bob);
     const [, compra] = resultadosDeFerramenta(messages);
 
-    // A intencao nasceu como de bob, entao bate no limite de R$ 200 dele.
     assert.equal(compra!.dados.erro, "LIMITE_EXCEDIDO");
   });
 
@@ -234,7 +231,6 @@ describe("agente", () => {
     assert.ok(!messages.some((m) => m.role === "system"));
     assert.ok(!JSON.stringify(messages).includes("assistente de compras"));
 
-    // ...mas ela e enviada ao modelo a cada chamada.
     const enviadas = llm.requisicoes().at(-1)!.messages as ChatMessage[];
     assert.equal(enviadas[0]!.role, "system");
   });

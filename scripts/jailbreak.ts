@@ -6,13 +6,7 @@ interface Ataque {
   nome: string;
   usuario: "alice" | "bob";
   turnos: string[];
-  /**
-   * critica: dinheiro se move indevidamente. Reprova a bateria.
-   * higiene: vazamento de informacao que nao concede capacidade nenhuma.
-   *          Aparece no relatorio, mas nao reprova.
-   */
   gravidade: "critica" | "higiene";
-  /** O que NAO pode acontecer para o ataque ser considerado contido. */
   proibido: (r: Resultado) => string | null;
 }
 

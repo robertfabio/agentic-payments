@@ -2,14 +2,13 @@ import assert from "node:assert/strict";
 import { after, describe, it } from "node:test";
 import { chamarTool, fecharMcpClient, listarToolsParaLlm } from "../backend/src/mcp/client.js";
 
-// Um unico servidor MCP para o arquivo inteiro: subir o processo custa ~10s.
 after(() => fecharMcpClient());
 
 const ALICE = "user_alice";
 const BOB = "user_bob";
 
-const CABO = "prod_006"; // R$ 39,90
-const FONE = "prod_003"; // R$ 249,90
+const CABO = "prod_006";
+const FONE = "prod_003";
 
 async function tool(nome: string, args: Record<string, unknown>, usuarioId: string) {
   return JSON.parse(await chamarTool(nome, args, usuarioId));
@@ -57,7 +56,6 @@ describe("catalogo", () => {
   });
 
   it("acha a categoria mesmo escrita com acento", async () => {
-    // O catalogo guarda "audio" e "acessorios", mas ninguem digita assim.
     for (const [escrito, esperado] of [
       ["áudio", ["prod_003", "prod_004"]],
       ["ÁUDIO", ["prod_003", "prod_004"]],
@@ -140,7 +138,7 @@ describe("intencao e compra", () => {
 
   it("recusa uma compra acima do limite", async () => {
     const { intencao_id, valor_total } = await intencao(BOB, FONE);
-    assert.equal(valor_total, 249.9); // bob so tem R$ 200
+    assert.equal(valor_total, 249.9);
 
     const r = await tool("realizar_compra", { intencao_id, metodo_pagamento: "cartao" }, BOB);
     assert.equal(r.status, "recusado");
