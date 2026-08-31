@@ -1,9 +1,9 @@
 import { useState, useEffect, type FormEvent, useRef } from "react";
-import type { ChatMessage, LoginResponse } from "@agentic/shared";
+import type { ChatMessage, User } from "@agentic/shared";
 import { enviarChat } from "../api.js";
 
 interface Props {
-  sessao: LoginResponse;
+  usuario: User;
   onSair: () => void;
 }
 
@@ -54,7 +54,7 @@ function Mensagem({ m }: { m: ChatMessage }) {
   return null;
 }
 
-export function Chat({ sessao, onSair }: Props) {
+export function Chat({ usuario, onSair }: Props) {
   const [mensagens, setMensagens] = useState<ChatMessage[]>([]);
   const [conversaId, setConversaId] = useState<string | undefined>();
   const [texto, setTexto] = useState("");
@@ -80,7 +80,7 @@ export function Chat({ sessao, onSair }: Props) {
     setErro(null);
 
     try {
-      const resposta = await enviarChat(pergunta, sessao.token, conversaId);
+      const resposta = await enviarChat(pergunta, conversaId);
       setConversaId(resposta.conversa_id);
       setMensagens(resposta.messages);
     } catch (err) {
@@ -100,7 +100,7 @@ export function Chat({ sessao, onSair }: Props) {
         <div>
           <strong>Agentic Payments</strong>
           <p>
-            {sessao.usuario.username} — limite R$ {sessao.usuario.limite.toFixed(2)}
+            {usuario.username} — limite R$ {usuario.limite.toFixed(2)}
           </p>
         </div>
 
@@ -110,7 +110,7 @@ export function Chat({ sessao, onSair }: Props) {
       <main className="chat-messages">
         {mensagens.length === 0 && !carregando && (
           <div className="message assistant">
-            Olá, {sessao.usuario.username}! Posso mostrar o catálogo e fechar a compra por você. O
+            Olá, {usuario.username}! Posso mostrar o catálogo e fechar a compra por você. O
             que você está procurando?
           </div>
         )}

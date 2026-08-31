@@ -1,11 +1,11 @@
 import { useState, type FormEvent } from "react";
 import {FiUser, FiLock} from "react-icons/fi";
 import { MdOutlineChat } from "react-icons/md";
-import type { LoginResponse } from "@agentic/shared";
+import type { User } from "@agentic/shared";
 import { login } from "../api.js";
 
 
-export function Login({ onEntrar }: { onEntrar: (s: LoginResponse) => void }) {
+export function Login({ onEntrar }: { onEntrar: (u: User) => void }) {
   const [username, setUsername] = useState("alice");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export function Login({ onEntrar }: { onEntrar: (s: LoginResponse) => void }) {
     e.preventDefault();
     setErro(null);
     try {
-      onEntrar(await login({ username, senha }));
+      onEntrar((await login({ username, senha })).usuario);
     } catch (err) {
       setErro(err instanceof Error ? err.message : "Falha no login.");
     }
