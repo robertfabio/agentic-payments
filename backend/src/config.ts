@@ -22,6 +22,8 @@ export const config = {
       .filter(Boolean),
   },
 
+  limitePadrao: Number(process.env.LIMITE_PADRAO ?? 1000),
+
   auditoria: {
     arquivo: process.env.AUDIT_LOG_FILE ?? "",
   },

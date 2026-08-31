@@ -1,6 +1,6 @@
 import type { PaymentMethod, PurchaseIntent } from "@agentic/shared";
 
-import { SEED_USERS } from "@agentic/shared";
+import { buscarUsuarioPorId } from "@agentic/shared";
 
 /**
  * Representa internamente uma transação concluída.
@@ -42,15 +42,13 @@ const transacoes = new Map<string, Transaction>();
  * Alice -> R$ 5.000
  * Bob   -> R$ 200
  */
-const limitesDisponiveis = new Map<string, number>(
-  SEED_USERS.map((usuario) => [usuario.id, usuario.limite]),
-);
+const limitesDisponiveis = new Map<string, number>();
 
 /**
  * Retorna um usuário conhecido pelo sistema.
  */
 export function buscarUsuario(usuarioId: string) {
-  return SEED_USERS.find((usuario) => usuario.id === usuarioId);
+  return buscarUsuarioPorId(usuarioId);
 }
 
 /**
@@ -79,7 +77,10 @@ export function salvarTransacao(transacao: Transaction): void {
  * para determinado usuário.
  */
 export function obterLimiteDisponivel(usuarioId: string): number | undefined {
-  return limitesDisponiveis.get(usuarioId);
+  const jaGasto = limitesDisponiveis.get(usuarioId);
+  if (jaGasto !== undefined) return jaGasto;
+
+  return buscarUsuarioPorId(usuarioId)?.limite;
 }
 
 /**

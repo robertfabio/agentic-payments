@@ -1,15 +1,24 @@
+import { randomUUID } from "node:crypto";
 import { Router, type NextFunction, type Request, type Response } from "express";
 import {
-  SEED_USERS,
+  buscarUsuarioPorId,
+  buscarUsuarioPorUsername,
+  criarUsuario,
+  listarUsuarios,
   type ApiError,
   type LoginResponse,
-  type LogoutRequest,
-  type RefreshRequest,
   type RefreshResponse,
   type User,
 } from "@agentic/shared";
 import { config } from "../config.js";
-import { conferirSenha } from "./senha.js";
+import { conferirSenha, gerarHash } from "./senha.js";
+import {
+  loginSchema,
+  logoutSchema,
+  primeiroErro,
+  refreshSchema,
+  registerSchema,
+} from "./schemas.js";
 import {
   emitirPar,
   encerrarSessao,
@@ -36,8 +45,8 @@ if (SEGREDOS_DE_EXEMPLO.has(config.jwtSecret)) {
   console.warn(`${aviso} Ok em desenvolvimento, troque antes de expor o backend.`);
 }
 
-function paraUser(s: (typeof SEED_USERS)[number]): User {
-  return { id: s.id, username: s.username, limite: s.limite };
+function paraUser(u: { id: string; username: string; limite: number }): User {
+  return { id: u.id, username: u.username, limite: u.limite };
 }
 
 function erro(res: Response, status: number, corpo: ApiError) {
@@ -48,6 +57,13 @@ function naoAutenticado(res: Response) {
   return erro(res, 401, { erro: "NAO_AUTENTICADO", mensagem: "Token ausente ou invalido." });
 }
 
+function credenciaisInvalidas(res: Response) {
+  return erro(res, 401, {
+    erro: "CREDENCIAIS_INVALIDAS",
+    mensagem: "Usuario ou senha incorretos.",
+  });
+}
+
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const header = req.headers.authorization;
   if (!header?.startsWith("Bearer ")) return naoAutenticado(res);
@@ -55,51 +71,68 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   const payload = verificarAccess(header.slice(7));
   if (!payload) return naoAutenticado(res);
 
-  const seed = SEED_USERS.find((u) => u.id === payload.sub);
-  if (!seed) return naoAutenticado(res);
+  const usuario = buscarUsuarioPorId(payload.sub);
+  if (!usuario) return naoAutenticado(res);
 
-  req.usuario = paraUser(seed);
+  req.usuario = paraUser(usuario);
   req.tokenAtual = { jti: payload.jti, exp: payload.exp };
   return next();
 }
 
 export const authRouter: Router = Router();
 
-authRouter.post("/login", async (req, res) => {
-  const { username, senha } = (req.body ?? {}) as { username?: unknown; senha?: unknown };
+authRouter.post("/register", async (req, res) => {
+  const entrada = registerSchema.safeParse(req.body ?? {});
+  if (!entrada.success) {
+    return erro(res, 400, { erro: "DADOS_INVALIDOS", mensagem: primeiroErro(entrada.error) });
+  }
 
-  if (typeof username !== "string" || typeof senha !== "string") {
-    return erro(res, 401, {
-      erro: "CREDENCIAIS_INVALIDAS",
-      mensagem: "Usuario ou senha incorretos.",
+  const { username, senha } = entrada.data;
+
+  if (buscarUsuarioPorUsername(username)) {
+    return erro(res, 409, {
+      erro: "USUARIO_EM_USO",
+      mensagem: "Esse nome de usuario ja esta em uso.",
     });
   }
 
-  const seed = SEED_USERS.find((u) => u.username === username);
-  const hash = seed?.senha_hash ?? SEED_USERS[0]!.senha_hash;
+  const usuario = {
+    id: `user_${randomUUID().replaceAll("-", "").slice(0, 12)}`,
+    username,
+    senha_hash: await gerarHash(senha),
+    limite: config.limitePadrao,
+  };
+
+  criarUsuario(usuario);
+
+  const par = emitirPar(usuario.id);
+  const resposta: LoginResponse = { ...par, usuario: paraUser(usuario) };
+  return res.status(201).json(resposta);
+});
+
+authRouter.post("/login", async (req, res) => {
+  const entrada = loginSchema.safeParse(req.body ?? {});
+  if (!entrada.success) return credenciaisInvalidas(res);
+
+  const { username, senha } = entrada.data;
+  const usuario = buscarUsuarioPorUsername(username);
+  const hash = usuario?.senha_hash ?? listarUsuarios()[0]!.senha_hash;
   const senhaConfere = await conferirSenha(senha, hash);
 
-  if (!seed || !senhaConfere) {
-    return erro(res, 401, {
-      erro: "CREDENCIAIS_INVALIDAS",
-      mensagem: "Usuario ou senha incorretos.",
-    });
-  }
+  if (!usuario || !senhaConfere) return credenciaisInvalidas(res);
 
-  const usuario = paraUser(seed);
   const par = emitirPar(usuario.id);
-  const resposta: LoginResponse = { ...par, usuario };
+  const resposta: LoginResponse = { ...par, usuario: paraUser(usuario) };
   return res.json(resposta);
 });
 
 authRouter.post("/refresh", (req, res) => {
-  const { refresh_token } = (req.body ?? {}) as Partial<RefreshRequest>;
-
-  if (typeof refresh_token !== "string" || !refresh_token) {
-    return erro(res, 400, { erro: "DADOS_INVALIDOS", mensagem: "Envie `refresh_token`." });
+  const entrada = refreshSchema.safeParse(req.body ?? {});
+  if (!entrada.success) {
+    return erro(res, 400, { erro: "DADOS_INVALIDOS", mensagem: primeiroErro(entrada.error) });
   }
 
-  const par = rotacionar(refresh_token);
+  const par = rotacionar(entrada.data.refresh_token);
   if (!par) {
     return erro(res, 401, {
       erro: "REFRESH_INVALIDO",
@@ -112,10 +145,13 @@ authRouter.post("/refresh", (req, res) => {
 });
 
 authRouter.post("/logout", requireAuth, (req, res) => {
-  const { refresh_token, todas } = (req.body ?? {}) as Partial<LogoutRequest>;
+  const entrada = logoutSchema.safeParse(req.body ?? {});
+  if (!entrada.success) {
+    return erro(res, 400, { erro: "DADOS_INVALIDOS", mensagem: primeiroErro(entrada.error) });
+  }
 
-  if (todas) encerrarTudo(req.usuario!.id);
-  encerrarSessao(typeof refresh_token === "string" ? refresh_token : undefined, {
+  if (entrada.data.todas) encerrarTudo(req.usuario!.id);
+  encerrarSessao(entrada.data.refresh_token, {
     sub: req.usuario!.id,
     typ: "access",
     ...req.tokenAtual!,

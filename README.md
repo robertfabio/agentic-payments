@@ -90,6 +90,7 @@ dependem dele.
 As rotas:
 
 ```
+POST   /auth/register  →  cria usuario e ja devolve a sessao
 POST   /auth/login    →  access token + refresh token
 POST   /auth/refresh  →  troca o refresh por um par novo
 POST   /auth/logout   →  encerra a sessao (precisa do token)
@@ -104,6 +105,13 @@ servidor e rotaciona a cada uso: reapresentar o antigo nao funciona. O logout
 revoga tambem o access atual, que sendo stateless continuaria valendo ate
 expirar. O frontend renova sozinho quando leva 401, entao ninguem cai para a
 tela de login no meio de uma compra.
+
+O registro valida com zod (usuario de 3 a 32 caracteres, senha de 8+). O limite
+de gasto de um usuario novo vem do servidor (`LIMITE_PADRAO`), nunca do request.
+
+Backend e servidor MCP leem o mesmo arquivo de usuarios, porque rodam em
+processos separados: sem isso, um usuario criado no backend nao existiria para
+as tools e toda compra seria recusada.
 
 As senhas do seed sao hash scrypt, nunca texto puro — as credenciais da tabela
 acima continuam valendo.

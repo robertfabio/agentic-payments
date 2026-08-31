@@ -1,7 +1,10 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import {
+  StdioClientTransport,
+  getDefaultEnvironment,
+} from "@modelcontextprotocol/sdk/client/stdio.js";
 import { config } from "../config.js";
 import { registrar, registrarFalha } from "../audit/log.js";
 
@@ -17,6 +20,11 @@ export function getMcpClient(): Promise<Client> {
         command: config.mcp.command,
         args: [...config.mcp.args],
         cwd: backendDir,
+        env: {
+          ...getDefaultEnvironment(),
+          ...(process.env.USUARIOS_FILE ? { USUARIOS_FILE: process.env.USUARIOS_FILE } : {}),
+          ...(process.env.INTENCAO_TTL_MS ? { INTENCAO_TTL_MS: process.env.INTENCAO_TTL_MS } : {}),
+        },
       }),
     );
     return cliente;

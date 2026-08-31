@@ -2,7 +2,15 @@ import type { AddressInfo } from "node:net";
 import type { Server } from "node:http";
 import { createServer } from "node:http";
 
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
 process.env.JWT_SECRET ??= "test-secret";
+process.env.USUARIOS_FILE ??= path.join(
+  mkdtempSync(path.join(tmpdir(), "agentic-test-")),
+  "usuarios.json",
+);
 
 export async function subirApp(): Promise<{ url: string; fechar: () => Promise<void> }> {
   const { app } = await import("../backend/src/app.js");
@@ -25,22 +33,14 @@ export interface ToolCallFalsa {
 export interface RespostaFalsa {
   content?: string | null;
   tool_calls?: ToolCallFalsa[];
-  /** Quando presente, o servidor devolve esse status em vez de uma resposta. */
   erro?: number;
 }
 
-/**
- * Um passo do roteiro pode ser uma funcao: ela recebe o corpo que o agente
- * mandou, o que permite ler o resultado da ferramenta anterior (por exemplo
- * o intencao_id, que so existe depois que o servidor MCP o gerou).
- */
 export type PassoFalso = RespostaFalsa | ((corpo: Record<string, unknown>) => RespostaFalsa);
 
 export interface LlmFalso {
   url: string;
-  /** Fila de respostas. Cada ida do agente ao modelo consome uma. */
   roteirizar: (...respostas: PassoFalso[]) => void;
-  /** Responde sempre a mesma coisa, para exercitar o teto de iteracoes. */
   repetir: (resposta: RespostaFalsa) => void;
   requisicoes: () => Record<string, unknown>[];
   fechar: () => Promise<void>;
@@ -72,8 +72,6 @@ function comoChatCompletion(r: RespostaFalsa) {
   };
 }
 
-// Finge ser a API da OpenAI. O agente nao percebe, entao o laco de ferramentas
-// roda de verdade contra o servidor MCP de verdade.
 export async function subirLlmFalso(): Promise<LlmFalso> {
   let fila: PassoFalso[] = [];
   let fixa: RespostaFalsa | undefined;
@@ -118,7 +116,6 @@ export async function subirLlmFalso(): Promise<LlmFalso> {
   };
 }
 
-// A ordem importa: `config` le o process.env no import do app.
 export async function subirTudo() {
   const llm = await subirLlmFalso();
   process.env.NVIDIA_API_KEY = "chave-de-teste";
