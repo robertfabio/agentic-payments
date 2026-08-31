@@ -27,6 +27,31 @@ function ResultadoFerramenta({ nome, conteudo }: { nome: string; conteudo: strin
   );
 }
 
+function comEnfase(texto: string) {
+  return texto.split(/(\*\*[^*]+\*\*|`[^`]+`)/g).map((parte, i) => {
+    if (parte.startsWith("**") && parte.endsWith("**") && parte.length > 4) {
+      return <strong key={i}>{parte.slice(2, -2)}</strong>;
+    }
+    if (parte.startsWith("`") && parte.endsWith("`") && parte.length > 2) {
+      return <code key={i}>{parte.slice(1, -1)}</code>;
+    }
+    return parte;
+  });
+}
+
+function Formatado({ texto }: { texto: string }) {
+  return (
+    <>
+      {texto.split("\n").map((linha, i) => (
+        <span key={i}>
+          {i > 0 && <br />}
+          {comEnfase(linha)}
+        </span>
+      ))}
+    </>
+  );
+}
+
 function Mensagem({ m }: { m: ChatMessage }) {
   if (m.role === "user") return <div className="message user">{m.content}</div>;
 
@@ -35,7 +60,11 @@ function Mensagem({ m }: { m: ChatMessage }) {
   if (m.role === "assistant") {
     return (
       <>
-        {m.content ? <div className="message assistant">{m.content}</div> : null}
+        {m.content ? (
+          <div className="message assistant">
+            <Formatado texto={m.content} />
+          </div>
+        ) : null}
         {m.tool_calls?.map((c) => (
           <div key={c.id} className="tool-call">
             <span className="tool-name">{c.function.name}</span>
@@ -96,7 +125,11 @@ export function Chat({ usuario, onSair }: Props) {
         <div>
           <strong>Agentic Payments</strong>
           <p>
-            {usuario.username} — limite R$ {usuario.limite.toFixed(2)}
+            {usuario.username} — limite{" "}
+            {usuario.limite.toLocaleString("pt-BR", {
+              style: "currency",
+              currency: "BRL",
+            })}
           </p>
         </div>
 
