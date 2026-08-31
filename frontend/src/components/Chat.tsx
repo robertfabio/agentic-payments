@@ -7,11 +7,7 @@ interface Props {
   onSair: () => void;
 }
 
-/**
- * O conteudo de uma mensagem `tool` e o JSON cru que o servidor MCP devolveu.
- * Mostramos formatado, e destacamos aprovado/recusado porque e exatamente
- * isso que precisa aparecer nos prints da entrega.
- */
+// O conteudo de uma mensagem `tool` e o JSON cru do servidor MCP.
 function ResultadoFerramenta({ nome, conteudo }: { nome: string; conteudo: string }) {
   let dados: unknown = null;
   try {
@@ -110,8 +106,8 @@ export function Chat({ usuario, onSair }: Props) {
       <main className="chat-messages">
         {mensagens.length === 0 && !carregando && (
           <div className="message assistant">
-            Olá, {usuario.username}! Posso mostrar o catálogo e fechar a compra por você. O
-            que você está procurando?
+            Olá, {usuario.username}! Posso mostrar o catálogo e fechar a compra por você. O que você
+            está procurando?
           </div>
         )}
 

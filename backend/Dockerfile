@@ -1,23 +1,17 @@
-# Imagem do backend. Contexto de build: a raiz do repositorio.
-#
-#   docker build -f backend/Dockerfile -t agentic-backend .
-#
-# O backend sobe o servidor MCP como processo filho, entao a imagem precisa
-# carregar tambem o workspace mcp-server e o shared.
+# Contexto de build: a raiz do repositorio.
+# Carrega o mcp-server junto porque o backend o sobe como processo filho.
 FROM node:22-alpine
 
 WORKDIR /app
 
-# Os manifests primeiro: enquanto eles nao mudam, o Docker reaproveita a
-# camada de instalacao e o build fica rapido.
+# Manifests primeiro para reaproveitar a camada de instalacao.
 COPY package.json package-lock.json ./
 COPY shared/package.json shared/
 COPY backend/package.json backend/
 COPY mcp-server/package.json mcp-server/
 COPY frontend/package.json frontend/
 
-# Sem --omit=dev de proposito: o `tsx`, que executa o TypeScript direto, e uma
-# devDependency da raiz e e o que roda o backend e o servidor MCP.
+# Sem --omit=dev: o tsx, que executa o TypeScript, e devDependency da raiz.
 RUN npm ci
 
 COPY tsconfig.base.json ./
@@ -28,9 +22,7 @@ COPY mcp-server/ mcp-server/
 ENV NODE_ENV=production
 ENV PORT=3001
 
-# Sem isso o cliente MCP chamaria `npx`, que resolve o pacote a cada spawn e
-# leva uns 20s na primeira vez. Dentro da imagem o tsx ja esta instalado, e o
-# npm run coloca node_modules/.bin no PATH do processo filho.
+# Evita o npx, que custava ~20s resolvendo o pacote no primeiro spawn.
 ENV MCP_SERVER_COMMAND=tsx
 
 EXPOSE 3001

@@ -62,17 +62,18 @@ function comoChatCompletion(r: RespostaFalsa) {
       {
         index: 0,
         finish_reason: tool_calls?.length ? "tool_calls" : "stop",
-        message: { role: "assistant", content: r.content ?? null, ...(tool_calls && { tool_calls }) },
+        message: {
+          role: "assistant",
+          content: r.content ?? null,
+          ...(tool_calls && { tool_calls }),
+        },
       },
     ],
   };
 }
 
-/**
- * Servidor minimo que fala o formato /chat/completions da OpenAI.
- * O agente nao sabe que nao e a NVIDIA do outro lado, entao o laco de
- * ferramentas roda de verdade contra o servidor MCP de verdade.
- */
+// Finge ser a API da OpenAI. O agente nao percebe, entao o laco de ferramentas
+// roda de verdade contra o servidor MCP de verdade.
 export async function subirLlmFalso(): Promise<LlmFalso> {
   let fila: PassoFalso[] = [];
   let fixa: RespostaFalsa | undefined;
@@ -117,10 +118,7 @@ export async function subirLlmFalso(): Promise<LlmFalso> {
   };
 }
 
-/**
- * Sobe o LLM falso, aponta a config do backend para ele e so entao importa o
- * app: `config` le o process.env no import, entao a ordem importa.
- */
+// A ordem importa: `config` le o process.env no import do app.
 export async function subirTudo() {
   const llm = await subirLlmFalso();
   process.env.NVIDIA_API_KEY = "chave-de-teste";

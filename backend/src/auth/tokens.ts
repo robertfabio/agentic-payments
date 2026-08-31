@@ -21,10 +21,7 @@ interface Payload extends jwt.JwtPayload {
 /** Refresh tokens vivos: jti -> dono e expiracao. Sair da conta remove daqui. */
 const refreshAtivos = new Map<string, { usuarioId: string; expiraEm: number }>();
 
-/**
- * Access tokens invalidados antes da hora. Sao stateless, entao sem essa
- * lista um logout deixaria o token anterior valendo ate expirar.
- */
+// Access e stateless: sem esta lista, o logout deixaria o token valendo ate expirar.
 const accessRevogados = new Map<string, number>();
 
 function limpar() {
@@ -82,10 +79,7 @@ export function verificarAccess(token: string): Payload | undefined {
   return payload;
 }
 
-/**
- * Consome um refresh token e devolve um par novo. O refresh usado e
- * descartado na hora (rotacao): reapresentar o antigo nao funciona.
- */
+// Rotaciona: o refresh usado e descartado, reapresentar o antigo nao funciona.
 export function rotacionar(refreshToken: string): ParDeTokens | undefined {
   limpar();
   const payload = verificar(refreshToken, "refresh");
@@ -112,7 +106,6 @@ export function encerrarSessao(refreshToken: string | undefined, accessPayload?:
   }
 }
 
-/** Derruba todas as sessoes do usuario. */
 export function encerrarTudo(usuarioId: string) {
   for (const [jti, s] of refreshAtivos) if (s.usuarioId === usuarioId) refreshAtivos.delete(jti);
 }

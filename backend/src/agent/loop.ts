@@ -4,10 +4,7 @@ import type { ChatMessage, ToolCall, User } from "@agentic/shared";
 import { config } from "../config.js";
 import { chamarTool, listarToolsParaLlm } from "../mcp/client.js";
 
-/**
- * Teto de idas ao modelo por request. Sem isso, um modelo que insiste em
- * chamar ferramenta gira para sempre e segura a conexao HTTP.
- */
+// Sem teto, um modelo que insiste em chamar ferramenta segura a conexao HTTP.
 const MAX_ITERACOES = 8;
 
 let cliente: OpenAI | undefined;
@@ -45,11 +42,8 @@ function systemPrompt(usuario: User): string {
   ].join("\n");
 }
 
-/**
- * A system prompt e montada a cada chamada e nunca fica guardada no historico.
- * Assim ela nao vaza para o frontend, e uma mensagem `system` forjada que
- * tenha entrado na conversa por qualquer caminho e descartada aqui.
- */
+// Monta a prompt a cada chamada em vez de guardar no historico: assim ela nao
+// vai para o frontend, e um `system` forjado que tenha entrado e descartado.
 function paraOpenAi(usuario: User, historico: ChatMessage[]): ChatCompletionMessageParam[] {
   return [
     { role: "system", content: systemPrompt(usuario) },
@@ -57,10 +51,8 @@ function paraOpenAi(usuario: User, historico: ChatMessage[]): ChatCompletionMess
   ] as ChatCompletionMessageParam[];
 }
 
-/**
- * Toda falha vira uma resposta de ferramenta que o modelo consegue ler.
- * Estourar aqui derrubaria a conversa inteira por causa de um JSON torto.
- */
+// Falha vira resposta legivel para o modelo: estourar aqui derrubaria a
+// conversa inteira por causa de um JSON torto.
 async function executar(chamada: ToolCall, usuarioId: string): Promise<string> {
   let args: Record<string, unknown>;
   try {

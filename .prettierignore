@@ -1,0 +1,6 @@
+node_modules/
+dist/
+build/
+
+# Gerado pelo npm; reformatar so cria ruido em diff e conflito de merge.
+package-lock.json

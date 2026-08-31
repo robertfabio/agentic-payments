@@ -7,9 +7,7 @@ import { randomUUID } from "node:crypto";
  * int_a81d921e42bc
  */
 export function gerarIntencaoId(): string {
-  const id = randomUUID()
-    .replaceAll("-", "")
-    .slice(0, 12);
+  const id = randomUUID().replaceAll("-", "").slice(0, 12);
 
   return `int_${id}`;
 }
@@ -21,9 +19,7 @@ export function gerarIntencaoId(): string {
  * tx_9ab8128f11cc
  */
 export function gerarTransacaoId(): string {
-  const id = randomUUID()
-    .replaceAll("-", "")
-    .slice(0, 12);
+  const id = randomUUID().replaceAll("-", "").slice(0, 12);
 
   return `tx_${id}`;
 }

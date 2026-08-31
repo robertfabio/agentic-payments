@@ -13,8 +13,7 @@ services:
       - "3001:3001"
     environment:
       PORT: 3001
-      # O `:?` faz o compose falhar na hora com uma mensagem clara em vez de
-      # subir um container que so quebra na primeira mensagem do chat.
+      # `:?` falha na subida em vez de quebrar so na primeira mensagem do chat.
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
       NVIDIA_API_KEY: ${NVIDIA_API_KEY:?defina NVIDIA_API_KEY no .env}
       NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}

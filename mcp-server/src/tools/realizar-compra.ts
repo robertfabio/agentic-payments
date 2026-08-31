@@ -1,17 +1,10 @@
 import { z } from "zod";
 
-import type {
-  PaymentMethod,
-  PurchaseResult,
-} from "@agentic/shared";
+import type { PaymentMethod, PurchaseResult } from "@agentic/shared";
 
-import {
-  METODOS_PAGAMENTO,
-} from "@agentic/shared";
+import { METODOS_PAGAMENTO } from "@agentic/shared";
 
-import {
-  CATALOGO,
-} from "../catalog.js";
+import { CATALOGO } from "../catalog.js";
 
 import {
   atualizarLimiteDisponivel,
@@ -21,13 +14,9 @@ import {
   salvarTransacao,
 } from "../store/state.js";
 
-import {
-  gerarTransacaoId,
-} from "../utils/ids.js";
+import { gerarTransacaoId } from "../utils/ids.js";
 
-import {
-  jsonResult,
-} from "../utils/result.js";
+import { jsonResult } from "../utils/result.js";
 
 /**
  * Importante:
@@ -44,11 +33,9 @@ import {
 export const schema = {
   usuario_id: z.string(),
 
-  intencao_id:
-    z.string(),
+  intencao_id: z.string(),
 
-  metodo_pagamento:
-    z.string(),
+  metodo_pagamento: z.string(),
 };
 
 interface RealizarCompraArgs {
@@ -61,12 +48,8 @@ interface RealizarCompraArgs {
  * Verifica manualmente se o método recebido
  * corresponde a um dos métodos aceitos.
  */
-function metodoPagamentoValido(
-  metodo: string,
-): metodo is PaymentMethod {
-  return METODOS_PAGAMENTO.includes(
-    metodo as PaymentMethod,
-  );
+function metodoPagamentoValido(metodo: string): metodo is PaymentMethod {
+  return METODOS_PAGAMENTO.includes(metodo as PaymentMethod);
 }
 
 /**
@@ -105,28 +88,16 @@ function compraRecusada(
  * 9. limite;
  * 10. pagamento;
  */
-export async function realizarCompra(
-  args: RealizarCompraArgs,
-) {
-  const {
-    usuario_id,
-    intencao_id,
-    metodo_pagamento,
-  } = args;
+export async function realizarCompra(args: RealizarCompraArgs) {
+  const { usuario_id, intencao_id, metodo_pagamento } = args;
 
   /**
    * 1. Validar usuário.
    */
-  const usuario =
-    buscarUsuario(usuario_id);
+  const usuario = buscarUsuario(usuario_id);
 
   if (!usuario) {
-    return jsonResult(
-      compraRecusada(
-        "INTENCAO_INVALIDA",
-        "Usuário inválido para esta intenção.",
-      ),
-    );
+    return jsonResult(compraRecusada("INTENCAO_INVALIDA", "Usuário inválido para esta intenção."));
   }
 
   /**
@@ -138,10 +109,7 @@ export async function realizarCompra(
    *
    * não existirá no Map.
    */
-  const intencao =
-    buscarIntencao(
-      intencao_id,
-    );
+  const intencao = buscarIntencao(intencao_id);
 
   if (!intencao) {
     return jsonResult(
@@ -159,25 +127,16 @@ export async function realizarCompra(
    * Bob não pode utilizar uma intenção
    * criada para Alice.
    */
-  if (
-    intencao.usuario_id !==
-    usuario_id
-  ) {
+  if (intencao.usuario_id !== usuario_id) {
     return jsonResult(
-      compraRecusada(
-        "INTENCAO_INVALIDA",
-        "A intenção informada não pertence ao usuário atual.",
-      ),
+      compraRecusada("INTENCAO_INVALIDA", "A intenção informada não pertence ao usuário atual."),
     );
   }
 
   /**
    * 4. Impedir pagamento duplicado.
    */
-  if (
-    intencao.status ===
-    "paga"
-  ) {
+  if (intencao.status === "paga") {
     return jsonResult(
       compraRecusada(
         "INTENCAO_JA_PAGA",
@@ -189,20 +148,12 @@ export async function realizarCompra(
   /**
    * 5. Verificar expiração.
    */
-  const agora =
-    new Date();
+  const agora = new Date();
 
-  const expiracao =
-    new Date(
-      intencao.expira_em,
-    );
+  const expiracao = new Date(intencao.expira_em);
 
-  if (
-    agora.getTime() >
-    expiracao.getTime()
-  ) {
-    intencao.status =
-      "expirada";
+  if (agora.getTime() > expiracao.getTime()) {
+    intencao.status = "expirada";
 
     return jsonResult(
       compraRecusada(
@@ -215,16 +166,9 @@ export async function realizarCompra(
   /**
    * 6. Validar pagamento.
    */
-  if (
-    !metodoPagamentoValido(
-      metodo_pagamento,
-    )
-  ) {
+  if (!metodoPagamentoValido(metodo_pagamento)) {
     return jsonResult(
-      compraRecusada(
-        "METODO_INVALIDO",
-        "Método de pagamento inválido. Utilize cartao ou pix.",
-      ),
+      compraRecusada("METODO_INVALIDO", "Método de pagamento inválido. Utilize cartao ou pix."),
     );
   }
 
@@ -234,19 +178,12 @@ export async function realizarCompra(
    *
    * "cartao" | "pix"
    */
-  const metodo:
-    PaymentMethod =
-      metodo_pagamento;
+  const metodo: PaymentMethod = metodo_pagamento;
 
   /**
    * 7. O produto precisa continuar existindo.
    */
-  const produto =
-    CATALOGO.find(
-      (item) =>
-        item.id ===
-        intencao.produto_id,
-    );
+  const produto = CATALOGO.find((item) => item.id === intencao.produto_id);
 
   if (!produto) {
     return jsonResult(
@@ -264,31 +201,20 @@ export async function realizarCompra(
    * ter consumido o estoque depois que esta
    * intenção foi registrada.
    */
-  if (
-    produto.estoque <
-    intencao.quantidade
-  ) {
+  if (produto.estoque < intencao.quantidade) {
     return jsonResult({
       status: "recusado",
-      erro:
-        "ESTOQUE_INSUFICIENTE",
-      mensagem:
-        "O estoque atual não é suficiente para concluir esta compra.",
+      erro: "ESTOQUE_INSUFICIENTE",
+      mensagem: "O estoque atual não é suficiente para concluir esta compra.",
     });
   }
 
   /**
    * 9. Buscar limite atual do usuário.
    */
-  const limiteDisponivel =
-    obterLimiteDisponivel(
-      usuario_id,
-    );
+  const limiteDisponivel = obterLimiteDisponivel(usuario_id);
 
-  if (
-    limiteDisponivel ===
-    undefined
-  ) {
+  if (limiteDisponivel === undefined) {
     return jsonResult(
       compraRecusada(
         "LIMITE_EXCEDIDO",
@@ -305,10 +231,7 @@ export async function realizarCompra(
    * Nunca utilizamos um valor recebido
    * do modelo.
    */
-  if (
-    intencao.valor_total >
-    limiteDisponivel
-  ) {
+  if (intencao.valor_total > limiteDisponivel) {
     return jsonResult(
       compraRecusada(
         "LIMITE_EXCEDIDO",
@@ -330,28 +253,18 @@ export async function realizarCompra(
   /**
    * Calcula novo limite.
    */
-  const novoLimite =
-    Math.round(
-      (
-        limiteDisponivel -
-        intencao.valor_total
-      ) * 100,
-    ) / 100;
+  const novoLimite = Math.round((limiteDisponivel - intencao.valor_total) * 100) / 100;
 
   /**
    * Baixa o estoque SOMENTE depois
    * da compra ser aprovada.
    */
-  produto.estoque -=
-    intencao.quantidade;
+  produto.estoque -= intencao.quantidade;
 
   /**
    * Atualiza o limite.
    */
-  atualizarLimiteDisponivel(
-    usuario_id,
-    novoLimite,
-  );
+  atualizarLimiteDisponivel(usuario_id, novoLimite);
 
   /**
    * Marca a intenção como paga.
@@ -359,32 +272,25 @@ export async function realizarCompra(
    * Isso impede que a mesma intenção
    * seja utilizada duas vezes.
    */
-  intencao.status =
-    "paga";
+  intencao.status = "paga";
 
   /**
    * Criamos a transação.
    */
-  const transacaoId =
-    gerarTransacaoId();
+  const transacaoId = gerarTransacaoId();
 
-  const data =
-    new Date().toISOString();
+  const data = new Date().toISOString();
 
   salvarTransacao({
-    transacao_id:
-      transacaoId,
+    transacao_id: transacaoId,
 
-    intencao_id:
-      intencao.intencao_id,
+    intencao_id: intencao.intencao_id,
 
     usuario_id,
 
-    valor:
-      intencao.valor_total,
+    valor: intencao.valor_total,
 
-    metodo_pagamento:
-      metodo,
+    metodo_pagamento: metodo,
 
     data,
   });
@@ -392,30 +298,21 @@ export async function realizarCompra(
   /**
    * Resposta obrigatória de sucesso.
    */
-  const resultado:
-    PurchaseResult = {
-      status:
-        "aprovado",
+  const resultado: PurchaseResult = {
+    status: "aprovado",
 
-      transacao_id:
-        transacaoId,
+    transacao_id: transacaoId,
 
-      intencao_id:
-        intencao.intencao_id,
+    intencao_id: intencao.intencao_id,
 
-      valor:
-        intencao.valor_total,
+    valor: intencao.valor_total,
 
-      metodo_pagamento:
-        metodo,
+    metodo_pagamento: metodo,
 
-      limite_restante:
-        novoLimite,
+    limite_restante: novoLimite,
 
-      data,
-    };
+    data,
+  };
 
-  return jsonResult(
-    resultado,
-  );
+  return jsonResult(resultado);
 }

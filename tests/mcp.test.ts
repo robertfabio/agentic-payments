@@ -53,10 +53,7 @@ describe("catalogo", () => {
 
   it("filtra por categoria", async () => {
     const { produtos } = await tool("listar_catalogo", { categoria: "audio" }, ALICE);
-    assert.deepEqual(
-      produtos.map((p: { id: string }) => p.id).sort(),
-      ["prod_003", "prod_004"],
-    );
+    assert.deepEqual(produtos.map((p: { id: string }) => p.id).sort(), ["prod_003", "prod_004"]);
   });
 
   it("acha a categoria mesmo escrita com acento", async () => {

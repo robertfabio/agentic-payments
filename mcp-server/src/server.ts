@@ -1,37 +1,21 @@
-import {
-  McpServer,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-import {
-  StdioServerTransport,
-} from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
-import {
-  listarCatalogo,
-  schema as schemaCatalogo,
-} from "./tools/listar-catalogo.js";
+import { listarCatalogo, schema as schemaCatalogo } from "./tools/listar-catalogo.js";
 
-import {
-  registrarIntencao,
-  schema as schemaIntencao,
-} from "./tools/registrar-intencao.js";
+import { registrarIntencao, schema as schemaIntencao } from "./tools/registrar-intencao.js";
 
-import {
-  realizarCompra,
-  schema as schemaCompra,
-} from "./tools/realizar-compra.js";
+import { realizarCompra, schema as schemaCompra } from "./tools/realizar-compra.js";
 
 /**
  * Instância principal do servidor MCP.
  */
-const server =
-  new McpServer({
-    name:
-      "agentic-payments",
+const server = new McpServer({
+  name: "agentic-payments",
 
-    version:
-      "0.1.0",
-  });
+  version: "0.1.0",
+});
 
 /**
  * TOOL 1
@@ -42,11 +26,9 @@ server.registerTool(
   "listar_catalogo",
 
   {
-    description:
-      "Retorna os produtos disponiveis, opcionalmente filtrados por categoria.",
+    description: "Retorna os produtos disponiveis, opcionalmente filtrados por categoria.",
 
-    inputSchema:
-      schemaCatalogo,
+    inputSchema: schemaCatalogo,
   },
 
   listarCatalogo,
@@ -61,11 +43,9 @@ server.registerTool(
   "registrar_intencao",
 
   {
-    description:
-      "Registra a intencao de comprar um item e devolve um intencao_id.",
+    description: "Registra a intencao de comprar um item e devolve um intencao_id.",
 
-    inputSchema:
-      schemaIntencao,
+    inputSchema: schemaIntencao,
   },
 
   registrarIntencao,
@@ -80,11 +60,9 @@ server.registerTool(
   "realizar_compra",
 
   {
-    description:
-      "Executa o pagamento a partir de uma intencao ja registrada.",
+    description: "Executa o pagamento a partir de uma intencao ja registrada.",
 
-    inputSchema:
-      schemaCompra,
+    inputSchema: schemaCompra,
   },
 
   realizarCompra,
@@ -96,9 +74,7 @@ server.registerTool(
  * O backend iniciará/conectará o MCP Client
  * neste processo.
  */
-await server.connect(
-  new StdioServerTransport(),
-);
+await server.connect(new StdioServerTransport());
 
 /**
  * IMPORTANTE:
@@ -109,6 +85,4 @@ await server.connect(
  *
  * console.error escreve em stderr.
  */
-console.error(
-  "[mcp] servidor conectado",
-);
+console.error("[mcp] servidor conectado");

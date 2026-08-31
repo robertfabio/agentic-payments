@@ -126,7 +126,10 @@ describe("access token", () => {
   });
 
   it("recusa token sem sub", async () => {
-    assert.equal((await post(`${url}/api/chat`, { message: "oi" }, forjar({ typ: "access" }))).status, 401);
+    assert.equal(
+      (await post(`${url}/api/chat`, { message: "oi" }, forjar({ typ: "access" }))).status,
+      401,
+    );
   });
 
   it("recusa token sem tipo", async () => {
@@ -201,7 +204,11 @@ describe("logout", () => {
   after(() => fechar());
 
   async function logout(sessao: LoginResponse, corpo: object = {}) {
-    return post(`${url}/auth/logout`, { refresh_token: sessao.refresh_token, ...corpo }, sessao.token);
+    return post(
+      `${url}/auth/logout`,
+      { refresh_token: sessao.refresh_token, ...corpo },
+      sessao.token,
+    );
   }
 
   it("invalida o access token na hora", async () => {

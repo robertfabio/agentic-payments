@@ -2,13 +2,9 @@ import { z } from "zod";
 
 import { CATALOGO } from "../catalog.js";
 
-import {
-  buscarUsuario,
-} from "../store/state.js";
+import { buscarUsuario } from "../store/state.js";
 
-import {
-  jsonResult,
-} from "../utils/result.js";
+import { jsonResult } from "../utils/result.js";
 
 /**
  * Tira acentos e caixa para comparar categoria.
@@ -51,13 +47,8 @@ interface ListarCatalogoArgs {
  * Lista produtos disponíveis.
  * Quando categoria for enviada, filtra o catálogo.
  */
-export async function listarCatalogo(
-  args: ListarCatalogoArgs,
-) {
-  const {
-    usuario_id,
-    categoria,
-  } = args;
+export async function listarCatalogo(args: ListarCatalogoArgs) {
+  const { usuario_id, categoria } = args;
 
   /**
    * O usuário deve existir.
@@ -68,8 +59,7 @@ export async function listarCatalogo(
     return jsonResult({
       status: "recusado",
       erro: "USUARIO_INVALIDO",
-      mensagem:
-        "O usuário informado não existe.",
+      mensagem: "O usuário informado não existe.",
     });
   }
 
@@ -78,24 +68,11 @@ export async function listarCatalogo(
    */
   let produtos = CATALOGO;
 
-  /**
-   * Caso exista uma categoria, filtramos.
-   *
-   * toLowerCase evita problemas como:
-   *
-   * Audio
-   * AUDIO
-   * audio
-   */
+  // Aceita caixa e acento variados: "AUDIO", "audio", "áudio".
   if (categoria) {
-    const categoriaNormalizada =
-      normalizar(categoria);
+    const categoriaNormalizada = normalizar(categoria);
 
-    produtos = CATALOGO.filter(
-      (produto) =>
-        normalizar(produto.categoria) ===
-        categoriaNormalizada,
-    );
+    produtos = CATALOGO.filter((produto) => normalizar(produto.categoria) === categoriaNormalizada);
   }
 
   /**
@@ -105,14 +82,12 @@ export async function listarCatalogo(
    * porém não é obrigatória no retorno.
    */
   return jsonResult({
-    produtos: produtos.map(
-      (produto) => ({
-        id: produto.id,
-        nome: produto.nome,
-        preco: produto.preco,
-        moeda: produto.moeda,
-        estoque: produto.estoque,
-      }),
-    ),
+    produtos: produtos.map((produto) => ({
+      id: produto.id,
+      nome: produto.nome,
+      preco: produto.preco,
+      moeda: produto.moeda,
+      estoque: produto.estoque,
+    })),
   });
 }

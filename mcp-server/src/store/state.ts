@@ -1,11 +1,6 @@
-import type {
-  PaymentMethod,
-  PurchaseIntent,
-} from "@agentic/shared";
+import type { PaymentMethod, PurchaseIntent } from "@agentic/shared";
 
-import {
-  SEED_USERS,
-} from "@agentic/shared";
+import { SEED_USERS } from "@agentic/shared";
 
 /**
  * Representa internamente uma transação concluída.
@@ -48,61 +43,42 @@ const transacoes = new Map<string, Transaction>();
  * Bob   -> R$ 200
  */
 const limitesDisponiveis = new Map<string, number>(
-  SEED_USERS.map((usuario) => [
-    usuario.id,
-    usuario.limite,
-  ]),
+  SEED_USERS.map((usuario) => [usuario.id, usuario.limite]),
 );
 
 /**
  * Retorna um usuário conhecido pelo sistema.
  */
 export function buscarUsuario(usuarioId: string) {
-  return SEED_USERS.find(
-    (usuario) => usuario.id === usuarioId,
-  );
+  return SEED_USERS.find((usuario) => usuario.id === usuarioId);
 }
 
 /**
  * Salva uma nova intenção.
  */
-export function salvarIntencao(
-  intencao: PurchaseIntent,
-): void {
-  intencoes.set(
-    intencao.intencao_id,
-    intencao,
-  );
+export function salvarIntencao(intencao: PurchaseIntent): void {
+  intencoes.set(intencao.intencao_id, intencao);
 }
 
 /**
  * Busca uma intenção pelo ID.
  */
-export function buscarIntencao(
-  intencaoId: string,
-): PurchaseIntent | undefined {
+export function buscarIntencao(intencaoId: string): PurchaseIntent | undefined {
   return intencoes.get(intencaoId);
 }
 
 /**
  * Salva uma transação concluída.
  */
-export function salvarTransacao(
-  transacao: Transaction,
-): void {
-  transacoes.set(
-    transacao.transacao_id,
-    transacao,
-  );
+export function salvarTransacao(transacao: Transaction): void {
+  transacoes.set(transacao.transacao_id, transacao);
 }
 
 /**
  * Retorna o limite atualmente disponível
  * para determinado usuário.
  */
-export function obterLimiteDisponivel(
-  usuarioId: string,
-): number | undefined {
+export function obterLimiteDisponivel(usuarioId: string): number | undefined {
   return limitesDisponiveis.get(usuarioId);
 }
 
@@ -110,14 +86,8 @@ export function obterLimiteDisponivel(
  * Atualiza o limite disponível depois de
  * uma compra aprovada.
  */
-export function atualizarLimiteDisponivel(
-  usuarioId: string,
-  novoLimite: number,
-): void {
-  limitesDisponiveis.set(
-    usuarioId,
-    novoLimite,
-  );
+export function atualizarLimiteDisponivel(usuarioId: string, novoLimite: number): void {
+  limitesDisponiveis.set(usuarioId, novoLimite);
 }
 
 /**

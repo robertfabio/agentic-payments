@@ -67,11 +67,13 @@ async function renovar(): Promise<boolean> {
   return true;
 }
 
-/**
- * Faz a chamada autenticada e, se o access tiver expirado, renova uma vez e
- * repete. O usuario nao e deslogado a cada 15 minutos por causa disso.
- */
-async function autenticado(caminho: string, init: RequestInit, jaRenovou = false): Promise<Response> {
+// Renova uma vez e repete quando leva 401, senao o usuario cairia para o
+// login a cada 15 minutos.
+async function autenticado(
+  caminho: string,
+  init: RequestInit,
+  jaRenovou = false,
+): Promise<Response> {
   const res = await fetch(`${BASE_URL}${caminho}`, {
     ...init,
     headers: {

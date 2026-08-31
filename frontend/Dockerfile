@@ -1,9 +1,5 @@
-# Imagem do frontend. Contexto de build: a raiz do repositorio.
-#
-#   docker build -f frontend/Dockerfile -t agentic-frontend .
-#
-# Duas etapas: o Vite gera os arquivos estaticos, o nginx serve. A imagem final
-# nao carrega Node nem node_modules.
+# Contexto de build: a raiz do repositorio.
+# Vite gera os estaticos, nginx serve: a imagem final nao carrega Node.
 FROM node:22-alpine AS build
 
 WORKDIR /app
@@ -19,8 +15,7 @@ COPY tsconfig.base.json ./
 COPY shared/ shared/
 COPY frontend/ frontend/
 
-# O Vite injeta isso no bundle em tempo de build, nao de execucao: trocar a URL
-# da API depois exige rebuildar a imagem.
+# Entra no bundle em tempo de build: trocar depois exige rebuildar a imagem.
 ARG VITE_API_URL=http://localhost:3001
 ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build -w frontend

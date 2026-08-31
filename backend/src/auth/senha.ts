@@ -22,10 +22,7 @@ export async function gerarHash(senha: string): Promise<string> {
   return `scrypt$${N}$${R}$${P}$${sal.toString("hex")}$${hash.toString("hex")}`;
 }
 
-/**
- * Comparacao em tempo constante: um `===` vazaria, pelo tempo de resposta,
- * quantos bytes do hash bateram.
- */
+// timingSafeEqual: um `===` vazaria, pelo tempo, quantos bytes bateram.
 export async function conferirSenha(senha: string, guardado: string): Promise<boolean> {
   const partes = guardado.split("$");
   if (partes.length !== 6 || partes[0] !== "scrypt") return false;
