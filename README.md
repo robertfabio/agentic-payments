@@ -70,6 +70,10 @@ não sai do lugar.
 O bob existe pra ficar fácil de testar o limite estourando. Com R$ 200 ele
 compra o cabo mas não compra o fone.
 
+Para entender o projeto sem ler o código, comece por
+[docs/como-funciona.md](docs/como-funciona.md): explica o caminho de uma compra,
+por que o modelo não consegue trapacear e como testar cada recusa.
+
 ## Como está organizado
 
 ```
@@ -92,6 +96,7 @@ POST   /auth/logout   →  encerra a sessao (precisa do token)
 GET    /auth/me       →  usuario atual (precisa do token)
 POST   /api/chat      →  precisa do token
 DELETE /api/chat/:id  →  precisa do token
+GET    /api/auditoria →  log das tools chamadas (precisa do token)
 ```
 
 O access vale 15 minutos e o refresh 7 dias. O refresh fica guardado no
@@ -127,7 +132,7 @@ de lá.
 Testes:
 
 ```bash
-npm test        # 42 testes, ~18s, não precisa de chave de API
+npm test        # 69 testes, não precisa de chave de API
 npm run typecheck
 npm run lint
 ```
@@ -135,8 +140,12 @@ npm run lint
 O agente é testado contra um servidor que finge ser a API da OpenAI
 (`tests/helpers.ts`), com as respostas roteirizadas. O laço roda de verdade
 contra o servidor MCP de verdade — o que é falso é só o modelo. Dá pra cobrir
-compra aprovada, `intencao_id` alucinado, limite estourado e o modelo tentando
-trocar o `usuario_id`, tudo sem rede.
+compra aprovada, `intencao_id` alucinado, limite estourado, intenção expirada e
+o modelo tentando trocar o `usuario_id`, tudo sem rede.
+
+Cada chamada de ferramenta fica registrada com quem, quando, quanto e qual foi o
+resultado. `GET /api/auditoria` devolve os registros do próprio usuário, e
+`AUDIT_LOG_FILE` no `.env` grava também em JSONL no disco.
 
 ## O que precisa entregar
 
