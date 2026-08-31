@@ -29,6 +29,17 @@ outro usuário, intenção já paga, intenção vencida, e valor acima do limite
 
 ## Rodando
 
+Com Docker, que e o caminho mais previsivel:
+
+```bash
+cp .env.example .env     # preencha a NVIDIA_API_KEY e troque o JWT_SECRET
+docker compose up --build
+```
+
+Frontend em http://localhost:8080, backend em http://localhost:3001.
+
+Ou direto na maquina:
+
 ```bash
 npm install
 cp .env.example .env
@@ -75,10 +86,22 @@ dependem dele.
 As rotas:
 
 ```
-POST   /auth/login   →  token
-POST   /api/chat     →  precisa do token
-DELETE /api/chat/:id →  precisa do token
+POST   /auth/login    →  access token + refresh token
+POST   /auth/refresh  →  troca o refresh por um par novo
+POST   /auth/logout   →  encerra a sessao (precisa do token)
+GET    /auth/me       →  usuario atual (precisa do token)
+POST   /api/chat      →  precisa do token
+DELETE /api/chat/:id  →  precisa do token
 ```
+
+O access vale 15 minutos e o refresh 7 dias. O refresh fica guardado no
+servidor e rotaciona a cada uso: reapresentar o antigo nao funciona. O logout
+revoga tambem o access atual, que sendo stateless continuaria valendo ate
+expirar. O frontend renova sozinho quando leva 401, entao ninguem cai para a
+tela de login no meio de uma compra.
+
+As senhas do seed sao hash scrypt, nunca texto puro — as credenciais da tabela
+acima continuam valendo.
 
 O `/api/chat` recebe só a mensagem nova mais um `conversa_id`, e devolve a
 conversa inteira, incluindo as chamadas de ferramenta e o que elas responderam.
