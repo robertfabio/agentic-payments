@@ -1,0 +1,288 @@
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    color: #222;
+}
+
+button, input{
+    font: inherit;
+}
+
+.login-page{
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: linear-gradient(135deg, #eef4ff, #dbeafe);
+}
+
+.login-form{
+    width: 100%;
+    max-width: 420px;
+    padding: 40px;
+    background-color: white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+.login-icon{
+    display: flex;
+    justify-content: center;
+    color: #2563eb;
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.login-title{
+    margin: 0;
+    font-size: 34x;
+    font-weight: 700;
+    color: #1e3a8a;
+    letter-spacing: -0.5px;
+    text-align: center;
+}
+
+
+.login-subtitle{
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #64748b;
+    text-align: center;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.login-form input:focus{
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.login-form button{
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background-color: #2563eb;
+    color:white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.login-form button:hover{
+    background-color: #1d4ed8;
+}
+
+.chat-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f5f5f5;
+}
+
+.chat-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+}
+
+.chat-header strong{
+    font-size: 18px;
+}
+
+.chat-header button{
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+}
+
+.chat-header p{
+    margin: 4px 0 0;
+}
+
+.chat-messages{
+    flex: 1;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px;
+    overflow: auto;
+}
+
+.message{
+    max-width: 70%;
+    padding: 12px 16px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    line-height: 1.5;
+}
+
+.user{
+    margin-left: auto;
+    background-color: #222;
+    color: white;
+    border-top-right-radius: 4px;
+}
+
+.assistant{
+    margin-right: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-top-left-radius: 4px;
+}
+
+.mensagem-carregando{
+    color: #64748b;
+    font-style: italic;
+}
+
+.chat-input{
+     padding: 16px 24px;
+     background-color: white;
+     border-top: 1px solid #ddd;
+}
+
+.chat-input form{
+    display: flex;
+    gap: 8px;
+}
+
+
+.chat-input input{
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    outline: none;
+}
+
+.chat-input button{
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #222;
+    color: white;
+    cursor: pointer;
+}
+
+
+.input-wrapper{
+    position: relative;
+}
+
+.input-icon{
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+}
+
+.input-wrapper input{
+    padding-left: 42px;
+}
+
+.error-message{
+    color: red;
+}
+
+
+@media (max-width: 600px){
+    .chat-header{
+        padding: 12px 16px;
+    }
+
+    .chat-messages{
+        padding: 16px;
+    }
+
+    .message{
+        max-width: 85%;
+    }
+
+    .chat-input{
+        padding: 12px 16px;
+    }
+
+    .chat-input form{
+        gap: 6px;
+    }
+
+    .chat-input button{
+        padding: 12px 16px;
+    }
+}
+/* --- Atividade das ferramentas MCP ---------------------------------------- */
+
+.tool-call,
+.tool-result {
+    max-width: 85%;
+    margin: 0 auto 12px 0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #dbeafe;
+    background-color: #f8fbff;
+    font-size: 13px;
+}
+
+.tool-name {
+    display: inline-block;
+    margin-bottom: 6px;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.tool-call code {
+    display: block;
+    color: #475569;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    word-break: break-all;
+}
+
+.tool-result pre {
+    margin: 0;
+    max-height: 260px;
+    overflow: auto;
+    color: #334155;
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.tool-result.ok {
+    border-color: #bbf7d0;
+    background-color: #f0fdf4;
+}
+
+.tool-result.ok .tool-name {
+    color: #15803d;
+}
+
+.tool-result.recusado {
+    border-color: #fecaca;
+    background-color: #fef2f2;
+}
+
+.tool-result.recusado .tool-name {
+    color: #b91c1c;
+}
