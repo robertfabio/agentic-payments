@@ -14,6 +14,12 @@ export const config = {
     apiKey: process.env.NVIDIA_API_KEY ?? "",
     baseUrl: process.env.NVIDIA_BASE_URL ?? "https://integrate.api.nvidia.com/v1",
     model: process.env.NVIDIA_MODEL ?? "nvidia/nemotron-3-nano-30b-a3b",
+    fallbacks: (
+      process.env.NVIDIA_MODEL_FALLBACKS ?? "openai/gpt-oss-20b,deepseek-ai/deepseek-v4-flash-0731"
+    )
+      .split(",")
+      .map((m) => m.trim())
+      .filter(Boolean),
   },
 
   auditoria: {
