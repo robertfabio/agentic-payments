@@ -3,6 +3,8 @@ import type { ChatCompletionMessageParam } from "openai/resources/chat/completio
 import type { ChatMessage, ToolCall, User } from "@agentic/shared";
 import { config } from "../config.js";
 import { chamarTool, listarToolsParaLlm } from "../mcp/client.js";
+import { intencaoForaDaConversa, intencoesDaConversa } from "./intencoes.js";
+import { registrar } from "../audit/log.js";
 
 const MAX_ITERACOES = 8;
 const MAX_MENSAGENS_NO_CONTEXTO = 60;
@@ -63,7 +65,11 @@ function recortar(mensagens: ChatMessage[]): ChatMessage[] {
   return mensagens.slice(inicio);
 }
 
-async function executar(chamada: ToolCall, usuarioId: string): Promise<string> {
+async function executar(
+  chamada: ToolCall,
+  usuarioId: string,
+  emitidas: Set<string>,
+): Promise<string> {
   let args: Record<string, unknown>;
   try {
     args = chamada.function.arguments ? JSON.parse(chamada.function.arguments) : {};
@@ -73,6 +79,19 @@ async function executar(chamada: ToolCall, usuarioId: string): Promise<string> {
       erro: "ARGUMENTOS_INVALIDOS",
       mensagem: "Os argumentos nao formam um JSON valido.",
     });
+  }
+
+  const forasteira = intencaoForaDaConversa(chamada.function.name, args, emitidas);
+  if (forasteira !== null) {
+    const recusa = JSON.stringify({
+      status: "recusado",
+      erro: "INTENCAO_INVALIDA",
+      mensagem:
+        "A intencao informada nao foi registrada nesta conversa. Chame registrar_intencao antes de pagar.",
+    });
+
+    registrar(usuarioId, chamada.function.name, args, recusa, 0);
+    return recusa;
   }
 
   try {
@@ -90,6 +109,7 @@ export async function responder(historico: ChatMessage[], usuario: User): Promis
   const llm = getCliente();
   const tools = await listarToolsParaLlm();
   const messages: ChatMessage[] = [...historico];
+  const emitidas = intencoesDaConversa(historico);
 
   for (let i = 0; i < MAX_ITERACOES; i++) {
     const resposta = await llm.chat.completions.create({
@@ -114,11 +134,19 @@ export async function responder(historico: ChatMessage[], usuario: User): Promis
     if (toolCalls.length === 0) return messages;
 
     for (const chamada of toolCalls) {
+      const conteudo = await executar(chamada, usuario.id, emitidas);
+
+      for (const id of intencoesDaConversa([
+        { role: "tool", tool_call_id: chamada.id, name: chamada.function.name, content: conteudo },
+      ])) {
+        emitidas.add(id);
+      }
+
       messages.push({
         role: "tool",
         tool_call_id: chamada.id,
         name: chamada.function.name,
-        content: await executar(chamada, usuario.id),
+        content: conteudo,
       });
     }
   }

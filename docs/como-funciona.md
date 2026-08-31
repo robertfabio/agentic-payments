@@ -61,6 +61,13 @@ compara o valor com o saldo é o servidor, na hora de pagar.
 `intencao_id`, o servidor não vai achar no registro dele e recusa. Não adianta
 o id parecer legítimo.
 
+**E precisa ter nascido nesta conversa.** São duas barreiras, não uma. O backend
+guarda quais `intencao_id` apareceram nas respostas de `registrar_intencao`
+desta conversa, e recusa antes mesmo de chamar o servidor MCP se o id não
+estiver na lista. Sem isso, uma intenção que você registrou e não pagou numa
+conversa poderia ser cobrada em outra: ela é sua, está pendente e no prazo,
+então o servidor MCP sozinho aprovaria.
+
 Resumindo: o modelo pode pedir qualquer coisa. Só acontece o que o servidor
 aprovar.
 
