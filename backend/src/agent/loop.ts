@@ -4,8 +4,8 @@ import type { ChatMessage, ToolCall, User } from "@agentic/shared";
 import { config } from "../config.js";
 import { chamarTool, listarToolsParaLlm } from "../mcp/client.js";
 
-// Sem teto, um modelo que insiste em chamar ferramenta segura a conexao HTTP.
 const MAX_ITERACOES = 8;
+const MAX_MENSAGENS_NO_CONTEXTO = 60;
 
 let cliente: OpenAI | undefined;
 
@@ -42,17 +42,24 @@ function systemPrompt(usuario: User): string {
   ].join("\n");
 }
 
-// Monta a prompt a cada chamada em vez de guardar no historico: assim ela nao
-// vai para o frontend, e um `system` forjado que tenha entrado e descartado.
 function paraOpenAi(usuario: User, historico: ChatMessage[]): ChatCompletionMessageParam[] {
+  const limpo = historico.filter((m) => m.role !== "system");
+  const recorte = limpo.length > MAX_MENSAGENS_NO_CONTEXTO ? recortar(limpo) : limpo;
+
   return [
     { role: "system", content: systemPrompt(usuario) },
-    ...historico.filter((m) => m.role !== "system"),
+    ...recorte,
   ] as ChatCompletionMessageParam[];
 }
 
-// Falha vira resposta legivel para o modelo: estourar aqui derrubaria a
-// conversa inteira por causa de um JSON torto.
+function recortar(mensagens: ChatMessage[]): ChatMessage[] {
+  let inicio = mensagens.length - MAX_MENSAGENS_NO_CONTEXTO;
+
+  while (inicio < mensagens.length && mensagens[inicio]!.role === "tool") inicio++;
+
+  return mensagens.slice(inicio);
+}
+
 async function executar(chamada: ToolCall, usuarioId: string): Promise<string> {
   let args: Record<string, unknown>;
   try {
@@ -66,7 +73,6 @@ async function executar(chamada: ToolCall, usuarioId: string): Promise<string> {
   }
 
   try {
-    // chamarTool sobrescreve usuario_id com o do token: o modelo nao escolhe por quem compra.
     return await chamarTool(chamada.function.name, args, usuarioId);
   } catch (err) {
     return JSON.stringify({
