@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { config } from "../config.js";
+import { registrar, registrarFalha } from "../audit/log.js";
 
 const backendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -61,17 +62,24 @@ export async function chamarTool(
   argsDoModelo: Record<string, unknown>,
   usuarioId: string,
 ): Promise<string> {
-  const resultado = await (
-    await getMcpClient()
-  ).callTool({
-    name: nome,
-    arguments: { ...argsDoModelo, usuario_id: usuarioId },
-  });
+  const inicio = Date.now();
+  const argumentos = { ...argsDoModelo, usuario_id: usuarioId };
 
-  return ((resultado.content ?? []) as Array<{ type: string; text?: string }>)
-    .filter((b) => b.type === "text")
-    .map((b) => b.text ?? "")
-    .join("\n");
+  try {
+    const resultado = await (await getMcpClient()).callTool({ name: nome, arguments: argumentos });
+
+    const texto = ((resultado.content ?? []) as Array<{ type: string; text?: string }>)
+      .filter((b) => b.type === "text")
+      .map((b) => b.text ?? "")
+      .join("\n");
+
+    registrar(usuarioId, nome, argumentos, texto, Date.now() - inicio);
+    return texto;
+  } catch (err) {
+    const mensagem = err instanceof Error ? err.message : String(err);
+    registrarFalha(usuarioId, nome, argumentos, mensagem, Date.now() - inicio);
+    throw err;
+  }
 }
 
 export async function fecharMcpClient(): Promise<void> {

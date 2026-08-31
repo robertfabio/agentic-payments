@@ -16,6 +16,10 @@ export const config = {
     model: process.env.NVIDIA_MODEL ?? "nvidia/nemotron-3-nano-30b-a3b",
   },
 
+  auditoria: {
+    arquivo: process.env.AUDIT_LOG_FILE ?? "",
+  },
+
   mcp: {
     command: process.env.MCP_SERVER_COMMAND ?? "npx",
     args: (process.env.MCP_SERVER_ARGS ?? "tsx,../mcp-server/src/server.ts").split(","),
