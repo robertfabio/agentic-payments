@@ -42,7 +42,12 @@ Você vai precisar de uma chave da NVIDIA NIM (é grátis, pega em
 build.nvidia.com) e joga no `.env`. Se preferir rodar local com Ollama, é só
 trocar a `NVIDIA_BASE_URL`.
 
-Modelo padrão: `meta/llama-3.3-70b-instruct`.
+Modelo padrão: `nvidia/nemotron-3-nano-30b-a3b`.
+
+O `meta/llama-3.3-70b-instruct` que estava aqui antes foi aposentado pela NVIDIA
+em 26/08/2026 e agora devolve 410. Se você trocar de modelo, confira antes que
+ele faz tool calling — boa parte do catálogo da NIM não faz, e sem isso o agente
+não sai do lugar.
 
 ## Usuários pra testar
 
@@ -67,34 +72,48 @@ O `shared/src/contracts.ts` é o combinado do time. Se você precisar mudar
 alguma coisa lá, avisa os outros antes de mergear, porque as três partes
 dependem dele.
 
-Duas rotas, só:
+As rotas:
 
 ```
-POST /auth/login   →  token
-POST /api/chat     →  precisa do token
+POST   /auth/login   →  token
+POST   /api/chat     →  precisa do token
+DELETE /api/chat/:id →  precisa do token
 ```
 
-O `/api/chat` manda e recebe a conversa inteira toda vez, incluindo as chamadas
-de ferramenta e o que elas responderam. O desafio pede isso.
+O `/api/chat` recebe só a mensagem nova mais um `conversa_id`, e devolve a
+conversa inteira, incluindo as chamadas de ferramenta e o que elas responderam.
+O histórico fica no servidor: o cliente não consegue forjar uma resposta de
+ferramenta nem injetar uma mensagem `system`. A system prompt é montada a cada
+chamada e nunca é devolvida ao frontend.
 
 ## Estado atual
 
-Isso aqui é só a fundação: as pastas, os contratos e a configuração. As tools
-estão registradas mas ainda não fazem nada, o agente é um stub, e o frontend
-não tem CSS. É de propósito — cada um implementa a sua parte na sua branch.
+As três partes estão integradas na `feature/backend`:
 
 ```
-feature/mcp-payments    as três tools        mcp-server/src/tools/
-feature/agent-backend   o laço do agente     backend/src/agent/
-feature/frontend        as telas             frontend/src/
+feature/mcp-payments    as três tools        pronto, merjado
+feature/frontend        as telas             pronto, merjado
+feature/backend         o laço do agente     pronto
 ```
 
-Pra começar:
+O merge do frontend teve conflito no `Chat.tsx`: as duas branches saíram do
+mesmo commit e a do frontend ainda mandava o histórico inteiro pro `/api/chat`.
+Ficou com o contrato novo, mantendo o loading e o tratamento de erro que vieram
+de lá.
+
+Testes:
 
 ```bash
-git checkout main && git pull
-git checkout -b feature/sua-parte
+npm test        # 42 testes, ~18s, não precisa de chave de API
+npm run typecheck
+npm run lint
 ```
+
+O agente é testado contra um servidor que finge ser a API da OpenAI
+(`tests/helpers.ts`), com as respostas roteirizadas. O laço roda de verdade
+contra o servidor MCP de verdade — o que é falso é só o modelo. Dá pra cobrir
+compra aprovada, `intencao_id` alucinado, limite estourado e o modelo tentando
+trocar o `usuario_id`, tudo sem rede.
 
 ## O que precisa entregar
 
