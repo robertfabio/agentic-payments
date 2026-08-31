@@ -58,6 +58,28 @@ describe("catalogo", () => {
       ["prod_003", "prod_004"],
     );
   });
+
+  it("acha a categoria mesmo escrita com acento", async () => {
+    // O catalogo guarda "audio" e "acessorios", mas ninguem digita assim.
+    for (const [escrito, esperado] of [
+      ["áudio", ["prod_003", "prod_004"]],
+      ["ÁUDIO", ["prod_003", "prod_004"]],
+      ["acessórios", ["prod_006"]],
+      ["  Acessórios  ", ["prod_006"]],
+    ] as const) {
+      const { produtos } = await tool("listar_catalogo", { categoria: escrito }, ALICE);
+      assert.deepEqual(
+        produtos.map((p: { id: string }) => p.id).sort(),
+        [...esperado],
+        `categoria "${escrito}" nao bateu`,
+      );
+    }
+  });
+
+  it("devolve vazio para uma categoria que nao existe", async () => {
+    const { produtos } = await tool("listar_catalogo", { categoria: "geladeiras" }, ALICE);
+    assert.deepEqual(produtos, []);
+  });
 });
 
 describe("intencao e compra", () => {

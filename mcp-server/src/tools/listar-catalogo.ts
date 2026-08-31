@@ -11,6 +11,22 @@ import {
 } from "../utils/result.js";
 
 /**
+ * Tira acentos e caixa para comparar categoria.
+ *
+ * O catalogo guarda as categorias sem acento, mas tanto o usuario quanto o
+ * modelo escrevem em portugues normal, com acento. Sem normalizar, pedir a
+ * categoria acentuada devolvia lista vazia e o agente respondia que a
+ * categoria nao existe, o que e falso.
+ */
+function normalizar(texto: string): string {
+  return texto
+    .trim()
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+/**
  * Schema exposto pelo MCP.
  *
  * usuario_id:
@@ -73,12 +89,11 @@ export async function listarCatalogo(
    */
   if (categoria) {
     const categoriaNormalizada =
-      categoria.trim().toLowerCase();
+      normalizar(categoria);
 
     produtos = CATALOGO.filter(
       (produto) =>
-        produto.categoria
-          .toLowerCase() ===
+        normalizar(produto.categoria) ===
         categoriaNormalizada,
     );
   }
