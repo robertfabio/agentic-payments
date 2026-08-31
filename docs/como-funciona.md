@@ -99,6 +99,15 @@ E o clássico:
 
 Não muda nada. O limite está no servidor, não na conversa.
 
+Se preferir testar pelo terminal, sem abrir o navegador:
+
+```bash
+npm run e2e -- bob "quero 1 fone bluetooth, id prod_003" "sim, confirmo, paga no cartao"
+```
+
+Ele loga, manda as mensagens em sequencia e imprime as chamadas de ferramenta,
+os resultados e o log de auditoria no final.
+
 ## O que aparece na tela
 
 Cada bloco colorido no chat é uma ferramenta rodando:
