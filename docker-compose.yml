@@ -1,0 +1,37 @@
+# Sobe backend + frontend com um comando:
+#
+#   docker compose up --build
+#
+# Frontend em http://localhost:8080, backend em http://localhost:3001.
+# As variaveis vem do .env da raiz; NVIDIA_API_KEY e JWT_SECRET sao obrigatorias.
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      # O `:?` faz o compose falhar na hora com uma mensagem clara em vez de
+      # subir um container que so quebra na primeira mensagem do chat.
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      NVIDIA_API_KEY: ${NVIDIA_API_KEY:?defina NVIDIA_API_KEY no .env}
+      NVIDIA_BASE_URL: ${NVIDIA_BASE_URL:-https://integrate.api.nvidia.com/v1}
+      NVIDIA_MODEL: ${NVIDIA_MODEL:-nvidia/nemotron-3-nano-30b-a3b}
+      # O frontend containerizado responde na 8080, nao na 5173 do Vite.
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
