@@ -13,7 +13,7 @@ import { jsonResult } from "../utils/result.js";
 /**
  * Uma intenção será válida por cinco minutos.
  */
-const TEMPO_EXPIRACAO_MS = 5 * 60 * 1000;
+const TEMPO_EXPIRACAO_MS = Number(process.env.INTENCAO_TTL_MS ?? 5 * 60 * 1000);
 
 /**
  * Schema exposto para o MCP Client.
