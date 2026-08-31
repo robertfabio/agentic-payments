@@ -143,6 +143,7 @@ Testes:
 npm test        # 69 testes, não precisa de chave de API
 npm run typecheck
 npm run lint
+npm run e2e:ui   # navegador de verdade, precisa da chave da NVIDIA
 ```
 
 O agente é testado contra um servidor que finge ser a API da OpenAI

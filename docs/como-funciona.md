@@ -115,6 +115,23 @@ npm run e2e -- bob "quero 1 fone bluetooth, id prod_003" "sim, confirmo, paga no
 Ele loga, manda as mensagens em sequencia e imprime as chamadas de ferramenta,
 os resultados e o log de auditoria no final.
 
+### No navegador de verdade
+
+```bash
+npm run e2e:ui       # 9 testes no Chromium, com o modelo real
+npm run e2e:prints   # gera os prints da entrega em docs/prints/
+```
+
+O `e2e:ui` cobre login, sessao sobrevivendo a recarga, logout, e as compras no
+pix e no cartao, alem da recusa por limite. Os prints saem sozinhos em
+`docs/prints/`.
+
+O print da recusa por `intencao_id` invalido usa um modelo roteirizado, nao o
+real. Motivo: depois que a system prompt passou a proibir usar id de fora da
+conversa, o modelo simplesmente se recusa a tentar, e sem a tentativa o servidor
+nunca chega a ser exercitado. As chamadas de ferramenta e as respostas do
+servidor no print sao reais; so o modelo e scriptado.
+
 ### Bateria de jailbreak
 
 Com o backend no ar:
