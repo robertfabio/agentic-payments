@@ -1,6 +1,6 @@
 # Agentic Payments
 
-Um chatbot que conversa com um LLM e consegue comprar de verdade � bom, comprar
+Um chatbot que conversa com um LLM e consegue comprar de verdade. Bom, comprar
 de mentira, mas com todas as regras de uma compra de verdade.
 
 ## O desafio
@@ -17,9 +17,9 @@ jeito. Quem decide se a compra acontece é o servidor, nunca o LLM.
 
 São três ferramentas, expostas via MCP:
 
-- **listar_catalogo** � mostra o que tem à venda
-- **registrar_intencao** � reserva a intenção de comprar e devolve um id
-- **realizar_compra** � paga, a partir de um id que já existe
+- **listar_catalogo**: mostra o que tem à venda
+- **registrar_intencao**: reserva a intenção de comprar e devolve um id
+- **realizar_compra**: paga, a partir de um id que já existe
 
 O valor nunca é argumento de `realizar_compra`. Ele vem da intenção que o
 servidor guardou. Assim o modelo não consegue mudar o preço nem que queira.
@@ -50,7 +50,7 @@ npm run dev
 Frontend em http://localhost:5173, backend na 3001. Entre com
 **alice / alice123**.
 
-O servidor MCP sobe sozinho junto com o backend � se quiser rodar ele isolado
+O servidor MCP sobe sozinho junto com o backend. Se quiser rodar ele isolado
 pra debugar, `npm run dev:mcp`.
 
 ### A chave do modelo
@@ -78,7 +78,7 @@ NVIDIA_API_KEY=ollama
 NVIDIA_MODEL=qwen2.5:7b
 ```
 
-Só confira que o modelo escolhido faz **tool calling** � sem isso o agente não
+Só confira que o modelo escolhido faz **tool calling**. Sem isso o agente não
 sai do lugar.
 
 Modelo padrão: `nvidia/nemotron-3-nano-30b-a3b`. O
@@ -96,7 +96,7 @@ O bob existe pra ficar fácil de testar o limite estourando. Com R$ 200 ele
 compra o cabo mas não compra o fone.
 
 Não existe tela de cadastro: as contas acima já vêm criadas. A rota
-`POST /auth/register` funciona, se quiser criar outra pelo terminal � o limite
+`POST /auth/register` funciona, se quiser criar outra pelo terminal. O limite
 de um usuário novo vem do servidor (`LIMITE_PADRAO`), nunca do corpo do pedido.
 
 ```bash
@@ -155,7 +155,7 @@ Backend e servidor MCP leem o mesmo arquivo de usuarios, porque rodam em
 processos separados: sem isso, um usuario criado no backend nao existiria para
 as tools e toda compra seria recusada.
 
-As senhas do seed sao hash scrypt, nunca texto puro � as credenciais da tabela
+As senhas do seed sao hash scrypt, nunca texto puro. As credenciais da tabela
 acima continuam valendo.
 
 O `/api/chat` recebe só a mensagem nova mais um `conversa_id`, e devolve a

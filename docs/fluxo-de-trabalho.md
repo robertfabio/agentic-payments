@@ -55,7 +55,7 @@ npm run e2e:ui      # navegador de verdade, precisa da chave
 Um commit, uma mudança. Se a mensagem precisa de "e" no meio ("adiciona X e
 corrige Y"), provavelmente são dois commits.
 
-O corpo da mensagem explica **por que**, não o que — o diff já mostra o que
+O corpo da mensagem explica **por que**, não o que. O diff já mostra o que
 mudou. Exemplo do histórico:
 
 ```
