@@ -7,22 +7,112 @@ interface Props {
   onSair: () => void;
 }
 
-// O conteudo de uma mensagem `tool` e o JSON cru do servidor MCP.
-function ResultadoFerramenta({ nome, conteudo }: { nome: string; conteudo: string }) {
-  let dados: unknown = null;
-  try {
-    dados = JSON.parse(conteudo);
-  } catch {
-    dados = null;
+type Item =
+  | { tipo: "user"; chave: string; texto: string }
+  | { tipo: "assistant"; chave: string; texto: string }
+  | { tipo: "ferramenta"; chave: string; nome: string; args: string; resultado: string | null };
+
+function montarItens(mensagens: ChatMessage[]): Item[] {
+  const resultados = new Map<string, string>();
+  for (const m of mensagens) {
+    if (m.role === "tool") resultados.set(m.tool_call_id, m.content);
   }
 
-  const status = (dados as { status?: string } | null)?.status;
-  const variante = status === "aprovado" ? "ok" : status === "recusado" ? "recusado" : "";
+  const itens: Item[] = [];
+
+  mensagens.forEach((m, i) => {
+    if (m.role === "user") {
+      itens.push({ tipo: "user", chave: `u${i}`, texto: m.content });
+      return;
+    }
+
+    if (m.role !== "assistant") return;
+
+    if (m.content) itens.push({ tipo: "assistant", chave: `a${i}`, texto: m.content });
+
+    for (const c of m.tool_calls ?? []) {
+      itens.push({
+        tipo: "ferramenta",
+        chave: c.id,
+        nome: c.function.name,
+        args: c.function.arguments,
+        resultado: resultados.get(c.id) ?? null,
+      });
+    }
+  });
+
+  return itens;
+}
+
+function moeda(valor: number) {
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+interface Resumo {
+  variante: string;
+  texto: string;
+  aberto: boolean;
+}
+
+function resumir(nome: string, resultado: string | null): Resumo {
+  if (resultado === null) return { variante: "", texto: "executando…", aberto: false };
+
+  let dados: Record<string, unknown>;
+  try {
+    dados = JSON.parse(resultado) as Record<string, unknown>;
+  } catch {
+    return { variante: "", texto: "resposta ilegível", aberto: true };
+  }
+
+  if (dados.status === "aprovado") {
+    return {
+      variante: "ok",
+      texto: `aprovado · ${moeda(Number(dados.valor))} no ${dados.metodo_pagamento}`,
+      aberto: true,
+    };
+  }
+
+  if (dados.status === "recusado") {
+    return { variante: "recusado", texto: `recusado · ${dados.erro}`, aberto: true };
+  }
+
+  if (nome === "listar_catalogo" && Array.isArray(dados.produtos)) {
+    return { variante: "", texto: `${dados.produtos.length} produtos`, aberto: false };
+  }
+
+  if (nome === "registrar_intencao" && typeof dados.valor_total === "number") {
+    return { variante: "", texto: `intenção de ${moeda(dados.valor_total)}`, aberto: false };
+  }
+
+  return { variante: "", texto: "concluído", aberto: false };
+}
+
+function Ferramenta({
+  nome,
+  args,
+  resultado,
+}: Omit<Item & { tipo: "ferramenta" }, "tipo" | "chave">) {
+  const { variante, texto, aberto } = resumir(nome, resultado);
+
+  let corpo = resultado ?? "";
+  try {
+    corpo = JSON.stringify(JSON.parse(corpo), null, 2);
+  } catch {
+    corpo = resultado ?? "";
+  }
 
   return (
-    <div className={`tool-result ${variante}`}>
-      <span className="tool-name">{nome}</span>
-      <pre>{dados ? JSON.stringify(dados, null, 2) : conteudo}</pre>
+    <div className="ferramenta-bloco">
+      <details className={`ferramenta ${variante}`} open={aberto}>
+        <summary>
+          <span className="tool-name">{nome}</span>
+          <span className="tool-resumo">{texto}</span>
+        </summary>
+        <div className="ferramenta-corpo">
+          <code className="ferramenta-args">{args}</code>
+          {resultado !== null && <pre>{corpo}</pre>}
+        </div>
+      </details>
     </div>
   );
 }
@@ -52,33 +142,6 @@ function Formatado({ texto }: { texto: string }) {
   );
 }
 
-function Mensagem({ m }: { m: ChatMessage }) {
-  if (m.role === "user") return <div className="message user">{m.content}</div>;
-
-  if (m.role === "tool") return <ResultadoFerramenta nome={m.name} conteudo={m.content} />;
-
-  if (m.role === "assistant") {
-    return (
-      <>
-        {m.content ? (
-          <div className="message assistant">
-            <Formatado texto={m.content} />
-          </div>
-        ) : null}
-        {m.tool_calls?.map((c) => (
-          <div key={c.id} className="tool-call">
-            <span className="tool-name">{c.function.name}</span>
-            <code>{c.function.arguments}</code>
-          </div>
-        ))}
-      </>
-    );
-  }
-
-  // `system` nunca chega ao cliente: o backend monta a prompt a cada chamada.
-  return null;
-}
-
 export function Chat({ usuario, onSair }: Props) {
   const [mensagens, setMensagens] = useState<ChatMessage[]>([]);
   const [conversaId, setConversaId] = useState<string | undefined>();
@@ -98,7 +161,6 @@ export function Chat({ usuario, onSair }: Props) {
     const pergunta = texto;
     const anteriores = mensagens;
 
-    // Otimista, so para a mensagem aparecer na hora. A lista boa vem do servidor.
     setMensagens([...anteriores, { role: "user", content: pergunta }]);
     setTexto("");
     setCarregando(true);
@@ -109,8 +171,6 @@ export function Chat({ usuario, onSair }: Props) {
       setConversaId(resposta.conversa_id);
       setMensagens(resposta.messages);
     } catch (err) {
-      // O servidor descarta a pergunta quando falha, entao voltamos ao estado
-      // anterior para nao ficar dessincronizado com o historico de la.
       setMensagens(anteriores);
       setTexto(pergunta);
       setErro(err instanceof Error ? err.message : "Erro ao enviar mensagem");
@@ -119,17 +179,15 @@ export function Chat({ usuario, onSair }: Props) {
     }
   }
 
+  const itens = montarItens(mensagens);
+
   return (
     <div className="chat-page">
       <header className="chat-header">
         <div>
           <strong>Agentic Payments</strong>
           <p>
-            {usuario.username} — limite{" "}
-            {usuario.limite.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
+            {usuario.username} — limite {moeda(usuario.limite)}
           </p>
         </div>
 
@@ -137,18 +195,24 @@ export function Chat({ usuario, onSair }: Props) {
       </header>
 
       <main className="chat-messages">
-        {mensagens.length === 0 && !carregando && (
-          <div className="message assistant">
-            Olá, {usuario.username}! Posso mostrar o catálogo e fechar a compra por você. O que você
-            está procurando?
-          </div>
+        <p className="intro">Peça o catálogo para começar.</p>
+
+        {itens.map((item) =>
+          item.tipo === "ferramenta" ? (
+            <Ferramenta
+              key={item.chave}
+              nome={item.nome}
+              args={item.args}
+              resultado={item.resultado}
+            />
+          ) : (
+            <div key={item.chave} className={`message ${item.tipo}`}>
+              {item.tipo === "assistant" ? <Formatado texto={item.texto} /> : item.texto}
+            </div>
+          ),
         )}
 
-        {mensagens.map((m, i) => (
-          <Mensagem key={i} m={m} />
-        ))}
-
-        {carregando && <div className="message assistant mensagem-carregando">Digitando...</div>}
+        {carregando && <div className="message assistant mensagem-carregando">Digitando…</div>}
 
         {erro && <p className="error-message">{erro}</p>}
 
@@ -165,7 +229,7 @@ export function Chat({ usuario, onSair }: Props) {
           />
 
           <button type="submit" disabled={carregando}>
-            {carregando ? "Enviando..." : "Enviar"}
+            {carregando ? "Enviando…" : "Enviar"}
           </button>
         </form>
       </footer>

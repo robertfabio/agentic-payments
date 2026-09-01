@@ -25,11 +25,11 @@ export async function dizer(page: Page, texto: string) {
 }
 
 export function aprovadas(page: Page) {
-  return page.locator(".tool-result.ok").filter({ hasText: "realizar_compra" });
+  return page.locator(".ferramenta.ok").filter({ hasText: "realizar_compra" });
 }
 
 export function recusadas(page: Page) {
-  return page.locator(".tool-result.recusado").filter({ hasText: "realizar_compra" });
+  return page.locator(".ferramenta.recusado").filter({ hasText: "realizar_compra" });
 }
 
 export async function print(page: Page, nome: string) {

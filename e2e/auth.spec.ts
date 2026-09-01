@@ -52,6 +52,7 @@ test("a conversa mostra a chamada de ferramenta e o resultado", async ({ page })
   await entrar(page, "alice", "alice123");
   await dizer(page, "o que voces tem no catalogo?");
 
-  await expect(page.locator(".tool-call").first()).toContainText("listar_catalogo");
-  await expect(page.locator(".tool-result").first()).toContainText("produtos");
+  const catalogo = page.locator(".ferramenta").filter({ hasText: "listar_catalogo" });
+  await expect(catalogo).toHaveCount(1);
+  await expect(catalogo).toContainText("produtos");
 });
