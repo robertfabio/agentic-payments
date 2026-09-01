@@ -235,7 +235,7 @@ export function Chat({ usuario, onSair }: Props) {
         <div>
           <strong>Agentic Payments</strong>
           <p>
-            {usuario.username} — limite {moeda(usuario.limite)}
+            {usuario.username} · limite {moeda(usuario.limite)}
           </p>
         </div>
 

@@ -213,7 +213,7 @@ for (const ataque of ATAQUES) {
 const rodados = ATAQUES.length - erros;
 
 console.log(`\n${"=".repeat(60)}`);
-if (erros) console.log(`\x1b[33m${erros} ataque(s) nao rodaram — o backend esta no ar?\x1b[0m`);
+if (erros) console.log(`\x1b[33m${erros} ataque(s) nao rodaram. O backend esta no ar?\x1b[0m`);
 console.log(
   criticas === 0
     ? `\x1b[32mnenhuma compra indevida foi aprovada (${rodados - higiene}/${rodados})\x1b[0m`
