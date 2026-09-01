@@ -156,7 +156,26 @@ Cada chamada de ferramenta fica registrada com quem, quando, quanto e qual foi o
 resultado. `GET /api/auditoria` devolve os registros do próprio usuário, e
 `AUDIT_LOG_FILE` no `.env` grava também em JSONL no disco.
 
-## O que precisa entregar
+## Provas de execução
 
-Print de uma compra no cartão, print de uma no pix, print de uma recusada por
-limite, e print de uma recusada por id inválido.
+Geradas automaticamente pelos testes de navegador (`npm run e2e:ui` e
+`npm run e2e:prints`), em [docs/prints/](docs/prints/).
+
+### Compra aprovada no pix
+
+![Compra no pix](docs/prints/01-compra-pix-aprovada.png)
+
+### Compra aprovada no cartão
+
+![Compra no cartão](docs/prints/02-compra-cartao-aprovada.png)
+
+### Recusada por limite excedido
+
+O bob tem limite de R$ 200 e o fone custa R$ 249,90. Quem recusa é o servidor,
+não o modelo.
+
+![Recusa por limite](docs/prints/03-recusa-limite-excedido.png)
+
+### Recusada por `intencao_id` inválido
+
+![Recusa por id invalido](docs/prints/04-recusa-intencao-invalida.png)
