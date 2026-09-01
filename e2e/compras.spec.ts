@@ -47,10 +47,10 @@ test("nunca aprova compra com intencao_id inventado", async ({ page }) => {
 
   await expect(aprovadas(page)).toHaveCount(0);
 
-  const doServidor = await recusadas(page).count();
-  if (doServidor > 0) {
+  if ((await recusadas(page).count()) > 0) {
     await expect(recusadas(page)).toContainText("INTENCAO_INVALIDA");
-  } else {
-    await expect(page.locator(".message.assistant").last()).toContainText(/conversa|nao/i);
   }
+
+  const ultima = await page.locator(".message.assistant").last().innerText();
+  expect(ultima.toLowerCase()).not.toContain("aprovad");
 });
