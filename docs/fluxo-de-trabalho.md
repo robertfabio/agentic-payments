@@ -44,7 +44,7 @@ git checkout develop && git merge release/1.0.0
 ## Antes de mergear qualquer coisa
 
 ```bash
-npm test            # 87 testes, não precisa de chave de API
+npm test            # 94 testes, não precisa de chave de API
 npm run typecheck
 npm run lint
 npm run e2e:ui      # navegador de verdade, precisa da chave

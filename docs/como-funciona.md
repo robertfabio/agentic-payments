@@ -118,7 +118,7 @@ os resultados e o log de auditoria no final.
 ### No navegador de verdade
 
 ```bash
-npm run e2e:ui       # 9 testes no Chromium, com o modelo real
+npm run e2e:ui       # 10 testes no Chromium, com o modelo real
 npm run e2e:prints   # gera os prints da entrega em docs/prints/
 ```
 
