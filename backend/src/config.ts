@@ -37,6 +37,7 @@ export const config = {
   },
 
   mcp: {
+    timeoutMs: Number(process.env.MCP_TIMEOUT_MS ?? 180_000),
     command: process.env.MCP_SERVER_COMMAND ?? "npx",
     args: (process.env.MCP_SERVER_ARGS ?? "tsx,../mcp-server/src/server.ts").split(","),
   },

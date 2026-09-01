@@ -122,7 +122,8 @@ export async function subirTudo() {
   process.env.NVIDIA_BASE_URL = llm.url;
 
   const app = await subirApp();
-  const { fecharMcpClient } = await import("../backend/src/mcp/client.js");
+  const { fecharMcpClient, getMcpClient } = await import("../backend/src/mcp/client.js");
+  await getMcpClient();
 
   return {
     url: app.url,

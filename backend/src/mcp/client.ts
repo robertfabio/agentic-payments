@@ -43,7 +43,11 @@ export interface LlmTool {
 }
 
 export async function listarToolsParaLlm(): Promise<LlmTool[]> {
-  const { tools } = await (await getMcpClient()).listTools();
+  const { tools } = await (
+    await getMcpClient()
+  ).listTools(undefined, {
+    timeout: config.mcp.timeoutMs,
+  });
 
   return tools.map((tool) => {
     const schema = (tool.inputSchema ?? {}) as {
@@ -76,7 +80,9 @@ export async function chamarTool(
   const argumentos = { ...argsDoModelo, usuario_id: usuarioId };
 
   try {
-    const resultado = await (await getMcpClient()).callTool({ name: nome, arguments: argumentos });
+    const resultado = await (
+      await getMcpClient()
+    ).callTool({ name: nome, arguments: argumentos }, undefined, { timeout: config.mcp.timeoutMs });
 
     const texto = ((resultado.content ?? []) as Array<{ type: string; text?: string }>)
       .filter((b) => b.type === "text")
