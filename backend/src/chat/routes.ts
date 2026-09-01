@@ -3,6 +3,7 @@ import type { ApiError, ChatMessage, ChatRequest, ChatResponse } from "@agentic/
 import { requireAuth } from "../auth/index.js";
 import { responder } from "../agent/loop.js";
 import { apagarConversa, criarConversa, getConversa } from "./store.js";
+import { limitarTaxa } from "./limites.js";
 import { config } from "../config.js";
 
 export const chatRouter: Router = Router();
@@ -12,7 +13,7 @@ const naoEncontrada: ApiError = {
   mensagem: "Conversa inexistente ou de outro usuario.",
 };
 
-chatRouter.post("/chat", requireAuth, async (req, res) => {
+chatRouter.post("/chat", requireAuth, limitarTaxa, async (req, res) => {
   const usuario = req.usuario!;
   const { message, conversa_id } = (req.body ?? {}) as Partial<ChatRequest>;
 

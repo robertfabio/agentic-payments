@@ -12,6 +12,8 @@ export const config = {
 
   chat: {
     maxCaracteres: Number(process.env.CHAT_MAX_CARACTERES ?? 2000),
+    maxPorJanela: Number(process.env.CHAT_MAX_POR_JANELA ?? 20),
+    janelaMs: Number(process.env.CHAT_JANELA_MS ?? 60_000),
   },
 
   llm: {
