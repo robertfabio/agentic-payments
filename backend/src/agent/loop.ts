@@ -7,7 +7,6 @@ import { intencaoForaDaConversa, intencoesDaConversa } from "./intencoes.js";
 import { registrar } from "../audit/log.js";
 
 const MAX_ITERACOES = 8;
-const MAX_MENSAGENS_NO_CONTEXTO = 60;
 
 let cliente: OpenAI | undefined;
 
@@ -62,21 +61,10 @@ function systemPrompt(usuario: User): string {
 }
 
 function paraOpenAi(usuario: User, historico: ChatMessage[]): ChatCompletionMessageParam[] {
-  const limpo = historico.filter((m) => m.role !== "system");
-  const recorte = limpo.length > MAX_MENSAGENS_NO_CONTEXTO ? recortar(limpo) : limpo;
-
   return [
     { role: "system", content: systemPrompt(usuario) },
-    ...recorte,
+    ...historico.filter((m) => m.role !== "system"),
   ] as ChatCompletionMessageParam[];
-}
-
-function recortar(mensagens: ChatMessage[]): ChatMessage[] {
-  let inicio = mensagens.length - MAX_MENSAGENS_NO_CONTEXTO;
-
-  while (inicio < mensagens.length && mensagens[inicio]!.role === "tool") inicio++;
-
-  return mensagens.slice(inicio);
 }
 
 async function executar(
@@ -129,13 +117,17 @@ async function completar(
 
   for (const model of modelos) {
     try {
-      return await llm.chat.completions.create({
-        model,
-        messages,
-        tools,
-        tool_choice: "auto",
-        temperature: 0.2,
-      });
+      return await llm.chat.completions.create(
+        {
+          model,
+          messages,
+          tools,
+          tool_choice: "auto",
+          temperature: 0.2,
+          max_tokens: config.llm.maxTokens,
+        },
+        { timeout: config.llm.timeoutMs },
+      );
     } catch (err) {
       ultimoErro = err;
       const status = (err as { status?: number }).status;
