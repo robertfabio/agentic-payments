@@ -87,12 +87,58 @@ function resumir(nome: string, resultado: string | null): Resumo {
   return { variante: "", texto: "concluído", aberto: false };
 }
 
+interface ProdutoDoCatalogo {
+  id: string;
+  nome: string;
+  preco: number;
+  estoque: number;
+  imagem?: string;
+}
+
+function Vitrine({ produtos }: { produtos: ProdutoDoCatalogo[] }) {
+  return (
+    <div className="vitrine">
+      {produtos.map((p) => (
+        <article key={p.id} className="produto">
+          {p.imagem ? (
+            <img
+              src={p.imagem}
+              alt={p.nome}
+              loading="lazy"
+              onError={(e) => e.currentTarget.classList.add("sem-imagem")}
+            />
+          ) : (
+            <div className="produto-sem-foto" />
+          )}
+          <div className="produto-info">
+            <span className="produto-nome">{p.nome}</span>
+            <span className="produto-preco">{moeda(p.preco)}</span>
+            <span className="produto-estoque">{p.estoque} em estoque</span>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function catalogoDe(nome: string, resultado: string | null): ProdutoDoCatalogo[] | null {
+  if (nome !== "listar_catalogo" || resultado === null) return null;
+
+  try {
+    const dados = JSON.parse(resultado) as { produtos?: ProdutoDoCatalogo[] };
+    return Array.isArray(dados.produtos) && dados.produtos.length > 0 ? dados.produtos : null;
+  } catch {
+    return null;
+  }
+}
+
 function Ferramenta({
   nome,
   args,
   resultado,
 }: Omit<Item & { tipo: "ferramenta" }, "tipo" | "chave">) {
   const { variante, texto, aberto } = resumir(nome, resultado);
+  const produtos = catalogoDe(nome, resultado);
 
   let corpo = resultado ?? "";
   try {
@@ -103,7 +149,7 @@ function Ferramenta({
 
   return (
     <div className="ferramenta-bloco">
-      <details className={`ferramenta ${variante}`} open={aberto}>
+      <details className={`ferramenta ${variante}`} open={aberto && !produtos}>
         <summary>
           <span className="tool-name">{nome}</span>
           <span className="tool-resumo">{texto}</span>
@@ -113,6 +159,8 @@ function Ferramenta({
           {resultado !== null && <pre>{corpo}</pre>}
         </div>
       </details>
+
+      {produtos && <Vitrine produtos={produtos} />}
     </div>
   );
 }
