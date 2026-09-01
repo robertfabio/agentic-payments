@@ -10,8 +10,16 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET ?? "dev-secret",
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
 
+  chat: {
+    maxCaracteres: Number(process.env.CHAT_MAX_CARACTERES ?? 2000),
+    maxPorJanela: Number(process.env.CHAT_MAX_POR_JANELA ?? 20),
+    janelaMs: Number(process.env.CHAT_JANELA_MS ?? 60_000),
+  },
+
   llm: {
     apiKey: process.env.NVIDIA_API_KEY ?? "",
+    maxTokens: Number(process.env.NVIDIA_MAX_TOKENS ?? 1024),
+    timeoutMs: Number(process.env.NVIDIA_TIMEOUT_MS ?? 90_000),
     baseUrl: process.env.NVIDIA_BASE_URL ?? "https://integrate.api.nvidia.com/v1",
     model: process.env.NVIDIA_MODEL ?? "nvidia/nemotron-3-nano-30b-a3b",
     fallbacks: (
