@@ -121,9 +121,9 @@ provas de execução. O resto está em [docs/](docs/):
 ```mermaid
 flowchart LR
     U[Usuario] --> F[Frontend<br/>React + Vite<br/>5173]
-    F -->|"POST /api/chat<br/>Bearer token"| B[Backend<br/>Express<br/>3001]
-    B <-->|HTTPS| L[NVIDIA NIM<br/>nemotron-3-nano]
-    B <-->|MCP via stdio| M[Servidor MCP<br/>processo filho]
+    F -->|POST /api/chat| B[Backend<br/>Express<br/>3001]
+    B -->|HTTPS| L[NVIDIA NIM<br/>modelo]
+    B -->|MCP via stdio| M[Servidor MCP]
     M --> C[(Catalogo<br/>Intencoes<br/>Transacoes<br/>Limites)]
     B --> A[(Conversas<br/>Sessoes<br/>Auditoria)]
 ```

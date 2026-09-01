@@ -7,10 +7,10 @@ Diagramas do projeto. Para a explicação em texto, veja
 
 ```mermaid
 flowchart LR
-    U[Usuario] --> F[Frontend<br/>React + Vite<br/>porta 5173]
-    F -->|"POST /api/chat<br/>Bearer token"| B[Backend<br/>Express<br/>porta 3001]
-    B <-->|"HTTPS"| L[NVIDIA NIM<br/>nemotron-3-nano]
-    B <-->|"MCP via stdio"| M[Servidor MCP<br/>processo filho]
+    U[Usuario] --> F[Frontend<br/>React + Vite<br/>5173]
+    F -->|POST /api/chat| B[Backend<br/>Express<br/>3001]
+    B -->|HTTPS| L[NVIDIA NIM<br/>nemotron-3-nano]
+    B -->|MCP via stdio| M[Servidor MCP<br/>processo filho]
     M --> C[(Catalogo<br/>Intencoes<br/>Transacoes<br/>Limites)]
     B --> A[(Conversas<br/>Sessoes<br/>Auditoria)]
 ```
