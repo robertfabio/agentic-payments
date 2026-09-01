@@ -117,13 +117,17 @@ async function completar(
 
   for (const model of modelos) {
     try {
-      return await llm.chat.completions.create({
-        model,
-        messages,
-        tools,
-        tool_choice: "auto",
-        temperature: 0.2,
-      });
+      return await llm.chat.completions.create(
+        {
+          model,
+          messages,
+          tools,
+          tool_choice: "auto",
+          temperature: 0.2,
+          max_tokens: config.llm.maxTokens,
+        },
+        { timeout: config.llm.timeoutMs },
+      );
     } catch (err) {
       ultimoErro = err;
       const status = (err as { status?: number }).status;

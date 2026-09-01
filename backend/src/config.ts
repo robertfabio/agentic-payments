@@ -12,6 +12,8 @@ export const config = {
 
   llm: {
     apiKey: process.env.NVIDIA_API_KEY ?? "",
+    maxTokens: Number(process.env.NVIDIA_MAX_TOKENS ?? 1024),
+    timeoutMs: Number(process.env.NVIDIA_TIMEOUT_MS ?? 90_000),
     baseUrl: process.env.NVIDIA_BASE_URL ?? "https://integrate.api.nvidia.com/v1",
     model: process.env.NVIDIA_MODEL ?? "nvidia/nemotron-3-nano-30b-a3b",
     fallbacks: (
