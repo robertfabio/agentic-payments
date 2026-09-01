@@ -37,6 +37,7 @@ docker compose up --build
 ```
 
 Frontend em http://localhost:8080, backend em http://localhost:3001.
+Entre com **alice / alice123**.
 
 Ou direto na maquina:
 
@@ -46,19 +47,43 @@ cp .env.example .env
 npm run dev
 ```
 
-Backend na 3001, frontend na 5173. O servidor MCP sobe sozinho junto com o
-backend — se quiser rodar ele isolado pra debugar, `npm run dev:mcp`.
+Frontend em http://localhost:5173, backend na 3001. Entre com
+**alice / alice123**.
 
-Você vai precisar de uma chave da NVIDIA NIM (é grátis, pega em
-build.nvidia.com) e joga no `.env`. Se preferir rodar local com Ollama, é só
-trocar a `NVIDIA_BASE_URL`.
+O servidor MCP sobe sozinho junto com o backend — se quiser rodar ele isolado
+pra debugar, `npm run dev:mcp`.
 
-Modelo padrão: `nvidia/nemotron-3-nano-30b-a3b`.
+### A chave do modelo
 
-O `meta/llama-3.3-70b-instruct` que estava aqui antes foi aposentado pela NVIDIA
-em 26/08/2026 e agora devolve 410. Se você trocar de modelo, confira antes que
-ele faz tool calling — boa parte do catálogo da NIM não faz, e sem isso o agente
-não sai do lugar.
+Você precisa da **sua própria** chave da NVIDIA NIM. É grátis e leva um minuto:
+
+1. Crie a conta em [build.nvidia.com](https://build.nvidia.com)
+2. Escolha um modelo e clique em **Get API Key**
+3. Copie a chave (começa com `nvapi-`)
+4. Cole no seu `.env`:
+
+```
+NVIDIA_API_KEY=nvapi-sua-chave-aqui
+```
+
+O `.env` fica fora do git de propósito — cada pessoa usa a chave dela. O
+`.env.example` é o modelo, copie e preencha.
+
+Se preferir rodar local sem conta nenhuma, suba o [Ollama](https://ollama.com) e
+aponte pra ele:
+
+```
+NVIDIA_BASE_URL=http://localhost:11434/v1
+NVIDIA_API_KEY=ollama
+NVIDIA_MODEL=qwen2.5:7b
+```
+
+Só confira que o modelo escolhido faz **tool calling** — sem isso o agente não
+sai do lugar.
+
+Modelo padrão: `nvidia/nemotron-3-nano-30b-a3b`. O
+`meta/llama-3.3-70b-instruct` que estava aqui antes foi aposentado pela NVIDIA
+em 26/08/2026 e hoje devolve 410.
 
 ## Usuários pra testar
 
@@ -69,6 +94,16 @@ não sai do lugar.
 
 O bob existe pra ficar fácil de testar o limite estourando. Com R$ 200 ele
 compra o cabo mas não compra o fone.
+
+Não existe tela de cadastro: as contas acima já vêm criadas. A rota
+`POST /auth/register` funciona, se quiser criar outra pelo terminal — o limite
+de um usuário novo vem do servidor (`LIMITE_PADRAO`), nunca do corpo do pedido.
+
+```bash
+curl -X POST http://localhost:3001/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"fabio","senha":"senhaforte1"}'
+```
 
 Para entender o projeto sem ler o código, comece por
 [docs/como-funciona.md](docs/como-funciona.md): explica o caminho de uma compra,
@@ -124,12 +159,12 @@ chamada e nunca é devolvida ao frontend.
 
 ## Estado atual
 
-As três partes estão integradas na `feature/backend`:
+As três partes estão integradas na `main`:
 
 ```
-feature/mcp-payments    as três tools        pronto, merjado
-feature/frontend        as telas             pronto, merjado
-feature/backend         o laço do agente     pronto
+feature/mcp-payments    as três tools        merjado
+feature/frontend        as telas             merjado
+feature/backend         o laço do agente     merjado
 ```
 
 O merge do frontend teve conflito no `Chat.tsx`: as duas branches saíram do
@@ -140,7 +175,7 @@ de lá.
 Testes:
 
 ```bash
-npm test        # 69 testes, não precisa de chave de API
+npm test        # 87 testes, não precisa de chave de API
 npm run typecheck
 npm run lint
 npm run e2e:ui   # navegador de verdade, precisa da chave da NVIDIA
