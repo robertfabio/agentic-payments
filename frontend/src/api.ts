@@ -32,9 +32,7 @@ function guardar(nova: Sessao | null) {
   try {
     if (nova) localStorage.setItem(CHAVE, JSON.stringify(nova));
     else localStorage.removeItem(CHAVE);
-  } catch {
-    // Navegador sem storage: a sessao vale so enquanto a aba estiver aberta.
-  }
+  } catch {}
 }
 
 export function temSessao(): boolean {
@@ -47,7 +45,6 @@ async function parseOuFalhar<T>(res: Response): Promise<T> {
   return corpo as T;
 }
 
-/** Troca o refresh por um par novo. Devolve false quando a sessao morreu. */
 async function renovar(): Promise<boolean> {
   if (!sessao) return false;
 
@@ -67,8 +64,6 @@ async function renovar(): Promise<boolean> {
   return true;
 }
 
-// Renova uma vez e repete quando leva 401, senao o usuario cairia para o
-// login a cada 15 minutos.
 async function autenticado(
   caminho: string,
   init: RequestInit,
@@ -101,7 +96,6 @@ export async function login(credenciais: LoginRequest): Promise<LoginResponse> {
   return corpo;
 }
 
-/** Retoma a sessao guardada no navegador. Devolve null se ela nao vale mais. */
 export async function retomarSessao(): Promise<User | null> {
   if (!sessao) return null;
 
@@ -120,9 +114,7 @@ export async function logout(): Promise<void> {
       method: "POST",
       body: JSON.stringify({ refresh_token: refresh }),
     });
-  } catch {
-    // Sair da conta no cliente nao pode depender do servidor responder.
-  }
+  } catch {}
   guardar(null);
 }
 

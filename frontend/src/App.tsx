@@ -6,7 +6,6 @@ import { logout, retomarSessao, temSessao } from "./api.js";
 
 export function App() {
   const [usuario, setUsuario] = useState<User | null>(null);
-  // Enquanto conferimos a sessao guardada, nao piscamos a tela de login.
   const [verificando, setVerificando] = useState(temSessao());
 
   useEffect(() => {

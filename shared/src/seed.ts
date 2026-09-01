@@ -1,12 +1,3 @@
-/**
- * Usuarios de teste do desafio.
- *
- * As senhas ficam como hash scrypt (formato scrypt$N$r$p$sal$hash), nunca em
- * texto puro. As credenciais continuam sendo alice/alice123 e bob/bob123 —
- * estao documentadas no README de proposito, sao contas de demonstracao.
- *
- * O mcp-server importa daqui apenas `id` e `limite`.
- */
 export const SEED_USERS = [
   {
     id: "user_alice",

@@ -60,11 +60,8 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  /** Access token, curto. Vai no header Authorization. */
   token: string;
-  /** Refresh token, longo e revogavel. Serve para renovar o access. */
   refresh_token: string;
-  /** Validade do access em segundos, para o cliente renovar antes de expirar. */
   expira_em_s: number;
   usuario: User;
 }
@@ -81,7 +78,6 @@ export interface RefreshResponse {
 
 export interface LogoutRequest {
   refresh_token?: string;
-  /** Quando true, derruba todas as sessoes do usuario, nao so a atual. */
   todas?: boolean;
 }
 
