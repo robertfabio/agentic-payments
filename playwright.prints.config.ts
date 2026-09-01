@@ -28,7 +28,7 @@ export default defineConfig({
     },
     {
       command: "npm run dev:backend",
-      url: "http://127.0.0.1:3001/health",
+      url: "http://127.0.0.1:3001/ready",
       timeout: 120_000,
       reuseExistingServer: false,
       env: { NVIDIA_BASE_URL: `${LLM}/v1`, NVIDIA_API_KEY: "roteirizado" },

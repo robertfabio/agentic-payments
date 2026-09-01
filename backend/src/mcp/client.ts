@@ -11,6 +11,7 @@ import { registrar, registrarFalha } from "../audit/log.js";
 const backendDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 let clientePromise: Promise<Client> | undefined;
+let conectado = false;
 
 export function getMcpClient(): Promise<Client> {
   clientePromise ??= (async () => {
@@ -27,6 +28,7 @@ export function getMcpClient(): Promise<Client> {
         },
       }),
     );
+    conectado = true;
     return cliente;
   })().catch((err) => {
     clientePromise = undefined;
@@ -90,9 +92,14 @@ export async function chamarTool(
   }
 }
 
+export function mcpConectado(): boolean {
+  return conectado;
+}
+
 export async function fecharMcpClient(): Promise<void> {
   const pendente = clientePromise;
   if (!pendente) return;
   clientePromise = undefined;
+  conectado = false;
   await (await pendente).close();
 }

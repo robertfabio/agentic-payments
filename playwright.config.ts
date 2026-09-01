@@ -21,7 +21,7 @@ export default defineConfig({
   webServer: [
     {
       command: "npm run dev:backend",
-      url: "http://127.0.0.1:3001/health",
+      url: "http://127.0.0.1:3001/ready",
       timeout: 120_000,
       reuseExistingServer: true,
       stdout: "pipe",
