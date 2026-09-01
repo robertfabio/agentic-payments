@@ -118,12 +118,28 @@ provas de execução. O resto está em [docs/](docs/):
 
 ## Como está organizado
 
+```mermaid
+flowchart LR
+    U[Usuario] --> F[Frontend<br/>React + Vite<br/>5173]
+    F -->|"POST /api/chat<br/>Bearer token"| B[Backend<br/>Express<br/>3001]
+    B <-->|HTTPS| L[NVIDIA NIM<br/>nemotron-3-nano]
+    B <-->|MCP via stdio| M[Servidor MCP<br/>processo filho]
+    M --> C[(Catalogo<br/>Intencoes<br/>Transacoes<br/>Limites)]
+    B --> A[(Conversas<br/>Sessoes<br/>Auditoria)]
+```
+
+O modelo nunca fala com o servidor MCP direto. Ele só sugere chamadas, e o
+backend decide se executa, com o `usuario_id` que veio do token.
+
 ```
 shared/       contratos que todo mundo importa
 backend/      login, o agente, e o cliente MCP
 mcp-server/   as três tools
 frontend/     as duas telas
 ```
+
+Os outros diagramas (sequência de uma compra, árvore das barreiras, laço do
+agente, ciclo do token) estão em [docs/arquitetura.md](docs/arquitetura.md).
 
 O `shared/src/contracts.ts` é o combinado do time. Se você precisar mudar
 alguma coisa lá, avisa os outros antes de mergear, porque as três partes
@@ -182,7 +198,7 @@ de lá.
 Testes:
 
 ```bash
-npm test        # 87 testes, não precisa de chave de API
+npm test        # 94 testes, não precisa de chave de API
 npm run typecheck
 npm run lint
 npm run e2e:ui   # navegador de verdade, precisa da chave da NVIDIA

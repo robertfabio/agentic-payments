@@ -192,7 +192,7 @@ o que o servidor respondeu, em vez de confiar no resumo dele.
 | `mcp-server/` | As três ferramentas e o estado das compras |
 | `backend/`    | Login, o laço do agente e o cliente MCP    |
 | `frontend/`   | As duas telas                              |
-| `tests/`      | 69 testes, sem precisar de chave de API    |
+| `tests/`      | 94 testes, sem precisar de chave de API    |
 
 ## Uma nota sobre memória
 
