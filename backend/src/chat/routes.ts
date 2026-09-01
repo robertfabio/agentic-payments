@@ -3,6 +3,7 @@ import type { ApiError, ChatMessage, ChatRequest, ChatResponse } from "@agentic/
 import { requireAuth } from "../auth/index.js";
 import { responder } from "../agent/loop.js";
 import { apagarConversa, criarConversa, getConversa } from "./store.js";
+import { config } from "../config.js";
 
 export const chatRouter: Router = Router();
 
@@ -18,6 +19,14 @@ chatRouter.post("/chat", requireAuth, async (req, res) => {
   if (typeof message !== "string" || !message.trim()) {
     const erro: ApiError = { erro: "DADOS_INVALIDOS", mensagem: "Envie `message` com texto." };
     return res.status(400).json(erro);
+  }
+
+  if (message.length > config.chat.maxCaracteres) {
+    const erro: ApiError = {
+      erro: "MENSAGEM_LONGA",
+      mensagem: `A mensagem passa de ${config.chat.maxCaracteres} caracteres.`,
+    };
+    return res.status(413).json(erro);
   }
 
   const conversa = conversa_id ? getConversa(conversa_id, usuario.id) : undefined;

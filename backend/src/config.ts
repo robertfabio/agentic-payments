@@ -10,6 +10,10 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET ?? "dev-secret",
   corsOrigin: process.env.CORS_ORIGIN ?? "http://localhost:5173",
 
+  chat: {
+    maxCaracteres: Number(process.env.CHAT_MAX_CARACTERES ?? 2000),
+  },
+
   llm: {
     apiKey: process.env.NVIDIA_API_KEY ?? "",
     maxTokens: Number(process.env.NVIDIA_MAX_TOKENS ?? 1024),
