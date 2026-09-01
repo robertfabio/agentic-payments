@@ -88,6 +88,7 @@ export async function listarCatalogo(args: ListarCatalogoArgs) {
       preco: produto.preco,
       moeda: produto.moeda,
       estoque: produto.estoque,
+      imagem: produto.imagem,
     })),
   });
 }

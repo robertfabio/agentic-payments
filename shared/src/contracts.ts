@@ -11,6 +11,7 @@ export interface Product {
   preco: number;
   moeda: Moeda;
   estoque: number;
+  imagem: string;
 }
 
 export interface User {
